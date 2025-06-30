@@ -22,7 +22,7 @@ pip install -e .
 To train the model, run `train_qalas.py` as below:
 
 ```bash
-python train_qalas.py --data_path matlab/h5_data --check_val_every_n_epoch 4
+python train_qalas.py --data_path /autofs/space/marduk_001/users/tommy/data --check_val_every_n_epoch 4
 ```
 
 Note: some of the variables (e.g., turbo factor or echo spacing) might need to be updated in the  `fastmri/models/qalas_map.py` (L287-L288) based on your sequence.
