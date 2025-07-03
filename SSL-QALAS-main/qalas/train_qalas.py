@@ -168,7 +168,7 @@ def build_args():
         seed=42,  # random seed
         deterministic=True,  # makes things slower, but deterministic
         default_root_dir=default_root_dir,  # directory for logs and checkpoints
-        max_epochs=1000,  # max number of epochs
+        max_epochs=500,  # max number of epochs
     )
 
     args = parser.parse_args()

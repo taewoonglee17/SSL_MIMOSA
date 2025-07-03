@@ -84,7 +84,7 @@ dependencies:
     - pyparsing==3.0.7
     - pyrsistent==0.18.1
     - python-dateutil==2.8.2
-    - pytorch-lightning==1.5.10
+    - pytorch-lightning==1.5.10 # need to update + torch, torchvision, torchaudio
     - pytz==2022.1
     - pywavelets==1.3.0
     - pyyaml==6.0
