@@ -261,7 +261,7 @@ class SliceDatasetQALAS(torch.utils.data.Dataset):
             dataset_cache = {}
 
         # check if our dataset is in the cache
-        # if there, use that metadata, if not, then regenerate the metadata
+        # if there is, use that metadata, if not, then regenerate the metadata
         if dataset_cache.get(root) is None or not use_dataset_cache:
             files = list(Path(root).iterdir())
             for fname in sorted(files):

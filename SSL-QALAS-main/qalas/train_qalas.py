@@ -93,7 +93,7 @@ def build_args():
     parser = ArgumentParser()
 
     # basic args
-    path_config = pathlib.Path("../../fastmri_dirs.yaml")
+    path_config = pathlib.Path("fastmri_dirs.yaml") # run this train_qalas.py file while in the "SSL_QALAS/" directory
     # backend = "ddp"
     backend = "cuda"
     num_gpus = 2 if backend == "ddp" else 1
@@ -168,7 +168,9 @@ def build_args():
         seed=42,  # random seed
         deterministic=True,  # makes things slower, but deterministic
         default_root_dir=default_root_dir,  # directory for logs and checkpoints
-        max_epochs=500,  # max number of epochs
+        max_epochs=10,  # max number of epochs
+        check_val_every_n_epoch=4 # how often to run validation loop (default: every 1 epoch)
+
     )
 
     args = parser.parse_args()
