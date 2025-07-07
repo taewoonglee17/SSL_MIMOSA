@@ -4,8 +4,6 @@ Copyright (c) Facebook, Inc. and its affiliates.
 This source code is licensed under the MIT license found in the
 LICENSE file in the root directory of this source tree.
 """
-
-import os
 import pathlib
 from argparse import ArgumentParser
 
@@ -168,7 +166,7 @@ def build_args():
         seed=42,  # random seed
         deterministic=True,  # makes things slower, but deterministic
         default_root_dir=default_root_dir,  # directory for logs and checkpoints
-        max_epochs=10,  # max number of epochs
+        max_epochs=5,  # max number of epochs
         check_val_every_n_epoch=4 # how often to run validation loop (default: every 1 epoch)
 
     )
