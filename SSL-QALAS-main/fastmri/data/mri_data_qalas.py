@@ -348,6 +348,10 @@ class SliceDatasetQALAS(torch.utils.data.Dataset):
             kspace_acq3 = hf["kspace_acq3"][dataslice]
             kspace_acq4 = hf["kspace_acq4"][dataslice]
             kspace_acq5 = hf["kspace_acq5"][dataslice]
+            kspace_acq6 = hf["kspace_acq6"][dataslice]
+            kspace_acq7 = hf["kspace_acq7"][dataslice]
+            kspace_acq8 = hf["kspace_acq8"][dataslice]
+            kspace_acq9 = hf["kspace_acq9"][dataslice]
 
             # coil_sens = hf["coil_sens"][dataslice]
 
@@ -356,6 +360,10 @@ class SliceDatasetQALAS(torch.utils.data.Dataset):
             mask_acq3 = np.asarray(hf["mask_acq3"]) if "mask_acq3" in hf else None
             mask_acq4 = np.asarray(hf["mask_acq4"]) if "mask_acq4" in hf else None
             mask_acq5 = np.asarray(hf["mask_acq5"]) if "mask_acq5" in hf else None
+            mask_acq6 = np.asarray(hf["mask_acq6"]) if "mask_acq6" in hf else None
+            mask_acq7 = np.asarray(hf["mask_acq7"]) if "mask_acq7" in hf else None
+            mask_acq8 = np.asarray(hf["mask_acq8"]) if "mask_acq8" in hf else None
+            mask_acq9 = np.asarray(hf["mask_acq9"]) if "mask_acq9" in hf else None
 
             mask_brain = hf["mask_brain"][dataslice]
 
@@ -366,21 +374,22 @@ class SliceDatasetQALAS(torch.utils.data.Dataset):
             target_t1 = hf["reconstruction_t1"][dataslice]
             target_t2 = hf["reconstruction_t2"][dataslice]
             target_pd = hf["reconstruction_pd"][dataslice]
+            target_t2s = hf["reconstruction_t2s"][dataslice]
 
             attrs = dict(hf.attrs)
             attrs.update(metadata)
 
         if self.transform is None:
-            sample = (kspace_acq1, kspace_acq2, kspace_acq3, kspace_acq4, kspace_acq5, \
-                    mask_acq1, mask_acq2, mask_acq3, mask_acq4, mask_acq5, mask_brain, \
+            sample = (kspace_acq1, kspace_acq2, kspace_acq3, kspace_acq4, kspace_acq5, kspace_acq6, kspace_acq7, kspace_acq8, kspace_acq9,\
+                    mask_acq1, mask_acq2, mask_acq3, mask_acq4, mask_acq5, mask_acq6, mask_acq7, mask_acq8, mask_acq9, mask_brain, \
                     # coil_sens, \
-                    b1, ie, target_t1, target_t2, target_pd, \
+                    b1, ie, target_t1, target_t2, target_pd, target_t2s,\
                     attrs, fname.name, dataslice)
         else:
-            sample = self.transform(kspace_acq1, kspace_acq2, kspace_acq3, kspace_acq4, kspace_acq5, \
-                                    mask_acq1, mask_acq2, mask_acq3, mask_acq4, mask_acq5, mask_brain, \
+            sample = self.transform(kspace_acq1, kspace_acq2, kspace_acq3, kspace_acq4, kspace_acq5, kspace_acq6, kspace_acq7, kspace_acq8, kspace_acq9,\
+                                    mask_acq1, mask_acq2, mask_acq3, mask_acq4, mask_acq5, mask_acq5, mask_acq6, mask_acq7, mask_acq8, mask_acq9, mask_brain, \
                                     # coil_sens, \
-                                    b1, ie, target_t1, target_t2, target_pd, \
+                                    b1, ie, target_t1, target_t2, target_pd, target_t2s,\
                                     attrs, fname.name, dataslice)
 
         return sample

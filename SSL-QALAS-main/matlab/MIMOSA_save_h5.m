@@ -122,6 +122,7 @@ PD_map  = fliplr(rot90(PD_map));
 IE_map  = fliplr(rot90(IE_map));
 B1_map  = fliplr(rot90(B1_map));
 bmask   = fliplr(rot90(bmask));     % brain mask
+mask   = fliplr(rot90(mask)); 
 
 % Rotate and flip k-space data for each acquisition
 for i = 1:Nacq
@@ -169,10 +170,10 @@ h5write(file_name, '/reconstruction_ie', IE_map);
 h5create(file_name,'/reconstruction_b1',[Ny,Nx,Nz],'Datatype','single');
 h5write(file_name, '/reconstruction_b1', B1_map);
 
-% for i = 1:Nacq
-%     h5create(file_name,sprintf('/mask_acq%d',i),[Ny,1],'Datatype','single');
-%     h5write(file_name,sprintf('/mask_acq%d',i),mask(:,1));
-% end
+for i = 1:Nacq
+    h5create(file_name,sprintf('/mask_acq%d',i),[Ny,1],'Datatype','single');
+    h5write(file_name,sprintf('/mask_acq%d',i),mask(:,1));
+end
 
 h5create(file_name,'/mask_brain',[Ny,Nx,Nz],'Datatype','single');
 h5write(file_name, '/mask_brain', single(bmask));
