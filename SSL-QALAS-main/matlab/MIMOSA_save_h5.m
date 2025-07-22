@@ -22,8 +22,9 @@ tic
 load('/autofs/space/marduk_001/users/tommy/20250505_mimosa_invivo/mapping_mimosa_R6_yxw_s1_zsssl_dict_v2_b1Cor.mat', 'img_zsssl', 'T1_map', 'T2_map', 'T2s_map', 'PD_map', 'IE_map');
 load('/autofs/space/marduk_001/users/tommy/20250505_mimosa_invivo/B1map_yxw_R6_s1.mat', 'img_b1');
 
-input_img = single(img_zsssl);              % [X Y Z 9]
+input_img = single(img_zsssl);            
 input_img = reshape(input_img, [size(input_img,1), size(input_img,2), size(input_img,3), 1, size(input_img,4)]);
+[Nx,Ny,Nz,~,Nacq]  = size(input_img);
 
 if load_b1_map == 1
     B1_map = single(img_b1);
@@ -38,17 +39,23 @@ if load_b1_map == 1
 end
 toc
 
-%% Brain Mask (simple thresholding mask) -> may not be accurate
+%% Brain Mask (BET-based, using img_zsssl)
+[Nx,Ny,Nz,~,Nacq] = size(input_img);
 
-threshold = 100; % 50 / 100/ 250
+% Create magnitude image from echoes 4 and 5
+mag_multi_echo = abs(img_zsssl(:,:,:,4:end));     % shape: [X, Y, Z, 2]
+mag = sqrt(sum(mag_multi_echo.^2, 4));            % shape: [X, Y, Z]
 
-[Nx,Ny,Nz,~,Nacq]  = size(input_img);
-bmask              = zeros(Nx,Ny,Nz,'single');
+% Optional: zero out top slices to suppress non-brain signal (can be adjusted or skipped)
+mag(1:33,:,:) = 0;
 
-for slc = 1:size(input_img,3)
-   bmask(:,:,slc) = imfill(squeeze(rsos(input_img(:,:,slc,1,:),5)) > threshold, 'holes');
-end
-bmask(:,:,129:end) = repmat(bmask(:,:,128),[1,1,(size(bmask,3)-129+1)]);
+% Run BET
+voxel_size  = [1 1 1];
+matrix_size = size(mag);
+bmask = BET(mag, matrix_size, voxel_size, 0.6, 0);   % 0.6 = fractional intensity threshold
+
+% Ensure single precision (matches original code)
+bmask = single(bmask);
 
 %% Normalize
 
@@ -115,28 +122,20 @@ fprintf('rotating and flipping image volumes ... ');
 tic
 
 % Helper function to rotate 3D volume
-rotate_volume = @(vol) permute(rot90(permute(vol, [2,1,3])), [2,1,3]);
+% rotate_volume = @(vol) permute(rot90(permute(vol, [2,1,3])), [2,1,3]);
 
 % Rotate and flip the image maps
-T1_map  = flip(rotate_volume(T1_map), 1);
-T2_map  = flip(rotate_volume(T2_map), 1);
-T2s_map = flip(rotate_volume(T2s_map), 1);
-PD_map  = flip(rotate_volume(PD_map), 1);
-IE_map  = flip(rotate_volume(IE_map), 1);
-B1_map  = flip(rotate_volume(B1_map), 1);
-bmask   = flip(rotate_volume(bmask), 1);     % brain mask
-mask    = flip(rot90(mask), 1);              % 2D mask: rotate then flip
-
-% Rotate and flip coil sensitivity maps
-tmp_sens = permute(rot90(permute(coil_sens, [2,1,3,4])), [2,1,3,4]);
-coil_sens = flip(tmp_sens, 1);
+T1_map  = fliplr(rot90(T1_map));
+T2_map  = fliplr(rot90(T2_map));
+T2s_map = fliplr(rot90(T2s_map));
+PD_map  = fliplr(rot90(PD_map));
+IE_map  = fliplr(rot90(IE_map));
+B1_map  = fliplr(rot90(B1_map));
+bmask   = fliplr(rot90(bmask));     % brain mask
 
 % Rotate and flip k-space data for each acquisition
 for i = 1:Nacq
-    tmp = kspace_acq{i};
-    tmp = rot90(tmp, 1);
-    tmp = flip(tmp, 1);
-    kspace_acq{i} = tmp;
+    kspace_acq{i} = fliplr(rot90(kspace_acq{i}));
 end
 
 % Update dimensions
