@@ -129,8 +129,8 @@ class MappingModel(nn.Module):
         chans: int,
         num_layers: int,
         num_pools: int = 3,
-        in_chans: int = 5,
-        out_chans: int = 4, # number of quantitative maps
+        in_chans: int = 9,
+        out_chans: int = 5, # number of quantitative maps
         drop_prob: float = 0.0,
     ):
         """
@@ -217,11 +217,19 @@ class QALAS_MAP(nn.Module):
         masked_kspace_acq3: torch.Tensor,
         masked_kspace_acq4: torch.Tensor,
         masked_kspace_acq5: torch.Tensor,
+        masked_kspace_acq6: torch.Tensor,
+        masked_kspace_acq7: torch.Tensor,
+        masked_kspace_acq8: torch.Tensor,
+        masked_kspace_acq9: torch.Tensor,
         mask_acq1: torch.Tensor,
         mask_acq2: torch.Tensor,
         mask_acq3: torch.Tensor,
         mask_acq4: torch.Tensor,
         mask_acq5: torch.Tensor,
+        mask_acq6: torch.Tensor,
+        mask_acq7: torch.Tensor,
+        mask_acq8: torch.Tensor,
+        mask_acq9: torch.Tensor,
         mask_brain: torch.Tensor,
         b1: torch.Tensor,
         ie: torch.Tensor,
@@ -229,6 +237,7 @@ class QALAS_MAP(nn.Module):
         max_value_t2: torch.Tensor,
         max_value_pd: torch.Tensor,
         max_value_ie: torch.Tensor,
+        max_value_t2s: torch.Tensor,
         num_low_frequencies: Optional[int] = None,
     ) -> torch.Tensor:
 
@@ -238,6 +247,10 @@ class QALAS_MAP(nn.Module):
         # image_pred_acq3 = fastmri.complex_abs(fastmri.complex_mul(fastmri.ifft2c(masked_kspace_acq3), fastmri.complex_conj(coil_sens)).sum(dim=1, keepdim=True) / np.sqrt(masked_kspace_acq3.shape[2] * masked_kspace_acq3.shape[3]))
         # image_pred_acq4 = fastmri.complex_abs(fastmri.complex_mul(fastmri.ifft2c(masked_kspace_acq4), fastmri.complex_conj(coil_sens)).sum(dim=1, keepdim=True) / np.sqrt(masked_kspace_acq4.shape[2] * masked_kspace_acq4.shape[3]))
         # image_pred_acq5 = fastmri.complex_abs(fastmri.complex_mul(fastmri.ifft2c(masked_kspace_acq5), fastmri.complex_conj(coil_sens)).sum(dim=1, keepdim=True) / np.sqrt(masked_kspace_acq5.shape[2] * masked_kspace_acq5.shape[3]))
+        # image_pred_acq6 = fastmri.complex_abs(fastmri.complex_mul(fastmri.ifft2c(masked_kspace_acq6), fastmri.complex_conj(coil_sens)).sum(dim=1, keepdim=True) / np.sqrt(masked_kspace_acq6.shape[2] * masked_kspace_acq6.shape[3]))
+        # image_pred_acq7 = fastmri.complex_abs(fastmri.complex_mul(fastmri.ifft2c(masked_kspace_acq7), fastmri.complex_conj(coil_sens)).sum(dim=1, keepdim=True) / np.sqrt(masked_kspace_acq7.shape[2] * masked_kspace_acq7.shape[3]))
+        # image_pred_acq8 = fastmri.complex_abs(fastmri.complex_mul(fastmri.ifft2c(masked_kspace_acq8), fastmri.complex_conj(coil_sens)).sum(dim=1, keepdim=True) / np.sqrt(masked_kspace_acq8.shape[2] * masked_kspace_acq8.shape[3]))
+        # image_pred_acq9 = fastmri.complex_abs(fastmri.complex_mul(fastmri.ifft2c(masked_kspace_acq9), fastmri.complex_conj(coil_sens)).sum(dim=1, keepdim=True) / np.sqrt(masked_kspace_acq9.shape[2] * masked_kspace_acq9.shape[3]))
 
         # If DICOM data were used, use following 5 lines
         image_pred_acq1 = masked_kspace_acq1
@@ -245,12 +258,19 @@ class QALAS_MAP(nn.Module):
         image_pred_acq3 = masked_kspace_acq3
         image_pred_acq4 = masked_kspace_acq4
         image_pred_acq5 = masked_kspace_acq5
+        image_pred_acq6 = masked_kspace_acq6
+        image_pred_acq7 = masked_kspace_acq7
+        image_pred_acq8 = masked_kspace_acq8
+        image_pred_acq9 = masked_kspace_acq9
 
         # Using CNN for Mapping
-        map_pred = self.maps_net(torch.cat((image_pred_acq1, image_pred_acq2, image_pred_acq3, image_pred_acq4, image_pred_acq5), 1))
+        map_pred = self.maps_net(torch.cat((image_pred_acq1, image_pred_acq2, image_pred_acq3, image_pred_acq4, image_pred_acq5,
+                                            image_pred_acq6, image_pred_acq7, image_pred_acq8, image_pred_acq9), 1))
         # map_pred = (map_pred + 1) / 2
-        # map_pred = self.maps_net(torch.cat((image_pred_acq1, image_pred_acq2, image_pred_acq3, image_pred_acq4, image_pred_acq5, b1.unsqueeze(1).to(image_pred_acq1.device)), 1))
-        # map_pred = self.maps_net(torch.cat((image_pred_acq1, image_pred_acq2, image_pred_acq3, image_pred_acq4, image_pred_acq5, ie.unsqueeze(0).unsqueeze(1).to(image_pred_acq1.device)), 1))
+        # map_pred = self.maps_net(torch.cat((image_pred_acq1, image_pred_acq2, image_pred_acq3, image_pred_acq4, image_pred_acq5,
+        #                                     image_pred_acq6, image_pred_acq7, image_pred_acq8, image_pred_acq9, b1.unsqueeze(1).to(image_pred_acq1.device)), 1))
+        # map_pred = self.maps_net(torch.cat((image_pred_acq1, image_pred_acq2, image_pred_acq3, image_pred_acq4, image_pred_acq5,
+        #                                     image_pred_acq6, image_pred_acq7, image_pred_acq8, image_pred_acq9, ie.unsqueeze(0).unsqueeze(1).to(image_pred_acq1.device)), 1))
 
         map_pred_t1 = map_pred[:,0:1,:,:] * max_value_t1[0,:]
         map_pred_t2 = map_pred[:,1:2,:,:] * max_value_t2[0,:]
@@ -260,13 +280,15 @@ class QALAS_MAP(nn.Module):
         # map_pred_ie = map_pred[:,3:4,:,:] * (1 - 0.5) + 0.5 # 0.5-1.0
         map_pred_ie = map_pred[:,3:4,:,:] * (1 - 0.8) + 0.8 # 0.8-1.0
         # map_pred_ie = ie.unsqueeze(0).unsqueeze(1).to(map_pred.device) # for dict_v4 IE
+        map_pred_t2s = map_pred[:,4:5,:,:] * max_value_t2s[0,:]
 
         map_pred_b1 = b1.unsqueeze(1).to(map_pred.device)
         
         for cascade in self.cascades:
-            [img_acq1, img_acq2, img_acq3, img_acq4, img_acq5] = cascade(map_pred_t1, map_pred_t2, map_pred_pd, map_pred_ie, map_pred_b1)
-        return map_pred_t1.squeeze(1), map_pred_t2.squeeze(1), map_pred_pd.squeeze(1), map_pred_ie.squeeze(1), map_pred_b1.squeeze(1), \
-                img_acq1, img_acq2, img_acq3, img_acq4, img_acq5
+            [img_acq1, img_acq2, img_acq3, img_acq4, img_acq5, img_acq6, img_acq7, img_acq8, img_acq9] \
+            = cascade(map_pred_t1, map_pred_t2, map_pred_pd, map_pred_ie, map_pred_b1, map_pred_t2s)
+        return map_pred_t1.squeeze(1), map_pred_t2.squeeze(1), map_pred_pd.squeeze(1), map_pred_ie.squeeze(1), map_pred_b1.squeeze(1), map_pred_t2s.squeeze(1), \
+                img_acq1, img_acq2, img_acq3, img_acq4, img_acq5, img_acq6, img_acq7, img_acq8, img_acq9
 
 
 class QALASBlock(nn.Module):
@@ -382,9 +404,10 @@ class QALASBlock(nn.Module):
         init_map_pd: torch.Tensor,
         init_map_ie: torch.Tensor,
         init_map_b1: torch.Tensor,
+        init_map_t2s: torch.Tensor,
     ) -> torch.Tensor:
 
-        [init_img_acq1, init_img_acq2, init_img_acq3, init_img_acq4, init_img_acq5] = \
-            self.qalas_forward_eq(init_map_t1, init_map_t2, init_map_pd, init_map_ie, init_map_b1)
+        [init_img_acq1, init_img_acq2, init_img_acq3, init_img_acq4, init_img_acq5, init_img_acq6, init_img_acq7, init_img_acq8, init_img_acq9] = \
+            self.qalas_forward_eq(init_map_t1, init_map_t2, init_map_pd, init_map_ie, init_map_b1, init_map_t2s)
 
-        return init_img_acq1, init_img_acq2, init_img_acq3, init_img_acq4, init_img_acq5
+        return init_img_acq1, init_img_acq2, init_img_acq3, init_img_acq4, init_img_acq5, init_img_acq6, init_img_acq7, init_img_acq8, init_img_acq9
