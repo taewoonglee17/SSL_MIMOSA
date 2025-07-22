@@ -40,9 +40,6 @@ end
 toc
 
 %% Brain Mask (BET-based, using img_zsssl)
-[Nx,Ny,Nz,~,Nacq] = size(input_img);
-
-% Create magnitude image from echoes 4 and 5
 mag_multi_echo = abs(img_zsssl(:,:,:,4:end));     % shape: [X, Y, Z, 2]
 mag = sqrt(sum(mag_multi_echo.^2, 4));            % shape: [X, Y, Z]
 
