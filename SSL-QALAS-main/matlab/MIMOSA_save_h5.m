@@ -83,7 +83,7 @@ bmask       = permute(bmask,[2,1,3]);
 mask        = permute(mask,[2,1]);
 
 for i = 1:Nacq
-    kspace_acq{i} = single(input_img(:,:,:,:,i)); % size: [Y X 1 Z]
+    kspace_acq{i} = single(input_img(:,:,:,:,i));
 end
 
 %% TRIM (X direction only: 60:220)
@@ -109,6 +109,42 @@ mask        = mask(:,xrange);
 
 Nx = numel(xrange); % update after crop
 
+%% ROTATE ALL IMAGES 90 DEGREES COUNTERCLOCKWISE, THEN FLIP UPSIDE DOWN
+
+fprintf('rotating and flipping image volumes ... ');
+tic
+
+% Helper function to rotate 3D volume
+rotate_volume = @(vol) permute(rot90(permute(vol, [2,1,3])), [2,1,3]);
+
+% Rotate and flip the image maps
+T1_map  = flip(rotate_volume(T1_map), 1);
+T2_map  = flip(rotate_volume(T2_map), 1);
+T2s_map = flip(rotate_volume(T2s_map), 1);
+PD_map  = flip(rotate_volume(PD_map), 1);
+IE_map  = flip(rotate_volume(IE_map), 1);
+B1_map  = flip(rotate_volume(B1_map), 1);
+bmask   = flip(rotate_volume(bmask), 1);     % brain mask
+mask    = flip(rot90(mask), 1);              % 2D mask: rotate then flip
+
+% Rotate and flip coil sensitivity maps
+tmp_sens = permute(rot90(permute(coil_sens, [2,1,3,4])), [2,1,3,4]);
+coil_sens = flip(tmp_sens, 1);
+
+% Rotate and flip k-space data for each acquisition
+for i = 1:Nacq
+    tmp = kspace_acq{i};
+    tmp = rot90(tmp, 1);
+    tmp = flip(tmp, 1);
+    kspace_acq{i} = tmp;
+end
+
+% Update dimensions
+[Ny, Nx, ~] = size(T1_map);  % these are now updated after rotation + flip
+
+toc
+
+
 %% SAVE DATA
 
 fprintf('save h5 data ... ');
@@ -119,16 +155,17 @@ att_patient = '0000';
 att_seq     = 'QALAS';
 
 for i = 1:Nacq
-    kspace_acq{i} = permute(kspace_acq{i},[4,3,2,1]); % [Z Y X Coil] -> [Coil Z Y X]
+    kspace_acq{i} = permute(kspace_acq{i},[4,3,2,1]); % flips when making h5 file, so we unflip
 end
 coil_sens = permute(coil_sens,[4,3,2,1]);
 
-save_data = struct();
+data_to_save = struct();
 for i = 1:Nacq
-    save_data.(sprintf('kspace_acq%d', i)) = kspace_acq{i};
+    field_name = sprintf('kspace_acq%d', i);
+    data_to_save.(field_name) = kspace_acq{i};
 end
 
-saveh5(save_data, file_name, 'ComplexFormat',{'r','i'});
+saveh5(data_to_save, file_name, 'ComplexFormat', {'r','i'}, 'RootName', '/');
 
 h5create(file_name,'/reconstruction_t1',[Ny,Nx,Nz],'Datatype','single');
 h5write(file_name, '/reconstruction_t1', T1_map);
@@ -143,10 +180,10 @@ h5write(file_name, '/reconstruction_ie', IE_map);
 h5create(file_name,'/reconstruction_b1',[Ny,Nx,Nz],'Datatype','single');
 h5write(file_name, '/reconstruction_b1', B1_map);
 
-for i = 1:Nacq
-    h5create(file_name,sprintf('/mask_acq%d',i),[Ny,1],'Datatype','single');
-    h5write(file_name,sprintf('/mask_acq%d',i),mask(:,1));
-end
+% for i = 1:Nacq
+%     h5create(file_name,sprintf('/mask_acq%d',i),[Ny,1],'Datatype','single');
+%     h5write(file_name,sprintf('/mask_acq%d',i),mask(:,1));
+% end
 
 h5create(file_name,'/mask_brain',[Ny,Nx,Nz],'Datatype','single');
 h5write(file_name, '/mask_brain', single(bmask));
