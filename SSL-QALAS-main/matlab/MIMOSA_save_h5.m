@@ -28,20 +28,15 @@ input_img = reshape(input_img, [size(input_img,1), size(input_img,2), size(input
 
 if load_b1_map == 1
     B1_map = single(img_b1);
-    if b1_type == 1
-        B1_map = B1_map./800; % for TFL-based B1
-    elseif b1_type == 2
-        B1_map = B1_map./60; % for AFI-based B1
-    end
-    B1_map = imresize3(B1_map,[size(input_img,1),size(input_img,2),size(input_img,3)]);
     B1_map(B1_map>1.35) = 1.35;
     B1_map(B1_map<0.65) = 0.65;
 end
+
 toc
 
 %% Brain Mask (BET-based, using img_zsssl)
-mag_multi_echo = abs(img_zsssl(:,:,:,4:end));     % shape: [X, Y, Z, 2]
-mag = sqrt(sum(mag_multi_echo.^2, 4));            % shape: [X, Y, Z]
+mag_multi_echo = abs(img_zsssl(:,:,:,4:end));     % shape: [X, Y, Z, Numer of Input Images]
+mag = sqrt(sum(mag_multi_echo.^2, 4));
 
 % Optional: zero out top slices to suppress non-brain signal (can be adjusted or skipped)
 mag(1:33,:,:) = 0;
@@ -49,7 +44,7 @@ mag(1:33,:,:) = 0;
 % Run BET
 voxel_size  = [1 1 1];
 matrix_size = size(mag);
-bmask = BET(mag, matrix_size, voxel_size, 0.6, 0);   % 0.6 = fractional intensity threshold
+bmask = BET(mag, matrix_size, voxel_size, 0.25, 0);   % 0.6 = fractional intensity threshold
 
 % Ensure single precision (matches original code)
 bmask = single(bmask);
@@ -110,8 +105,6 @@ B1_map      = B1_map(:,xrange,:);
 
 bmask       = bmask(:,xrange,:);
 mask        = mask(:,xrange);
-
-Nx = numel(xrange); % update after crop
 
 %% ROTATE ALL IMAGES 90 DEGREES COUNTERCLOCKWISE, THEN FLIP UPSIDE DOWN
 
