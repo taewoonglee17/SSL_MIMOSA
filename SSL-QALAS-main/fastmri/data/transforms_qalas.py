@@ -411,11 +411,19 @@ class QALASSample(NamedTuple):
     masked_kspace_acq3: torch.Tensor
     masked_kspace_acq4: torch.Tensor
     masked_kspace_acq5: torch.Tensor
+    masked_kspace_acq6: torch.Tensor
+    masked_kspace_acq7: torch.Tensor
+    masked_kspace_acq8: torch.Tensor
+    masked_kspace_acq9: torch.Tensor
     mask_acq1: torch.Tensor
     mask_acq2: torch.Tensor
     mask_acq3: torch.Tensor
     mask_acq4: torch.Tensor
     mask_acq5: torch.Tensor
+    mask_acq6: torch.Tensor
+    mask_acq7: torch.Tensor
+    mask_acq8: torch.Tensor
+    mask_acq9: torch.Tensor
     mask_brain: torch.Tensor
     # coil_sens: torch.Tensor
     b1: torch.Tensor
@@ -424,11 +432,13 @@ class QALASSample(NamedTuple):
     target_t1: torch.Tensor
     target_t2: torch.Tensor
     target_pd: torch.Tensor
+    target_t2s: torch.Tensor
     fname: str
     slice_num: int
     max_value_t1: float
     max_value_t2: float
     max_value_pd: float
+    max_value_t2s: float
     crop_size: Tuple[int, int]
 
 
@@ -438,7 +448,9 @@ class QALASDataTransform:
     """
 
     def __init__(self, mask_func_acq1: Optional[MaskFunc] = None, mask_func_acq2: Optional[MaskFunc] = None, mask_func_acq3: Optional[MaskFunc] = None, \
-                mask_func_acq4: Optional[MaskFunc] = None, mask_func_acq5: Optional[MaskFunc] = None, use_seed: bool = True):
+                mask_func_acq4: Optional[MaskFunc] = None, mask_func_acq5: Optional[MaskFunc] = None, mask_func_acq6: Optional[MaskFunc] = None, \
+                mask_func_acq7: Optional[MaskFunc] = None, mask_func_acq8: Optional[MaskFunc] = None, mask_func_acq9: Optional[MaskFunc] = None, \
+                    use_seed: bool = True):
         """
         Args:
             mask_func: Optional; A function that can create a mask of
@@ -452,6 +464,10 @@ class QALASDataTransform:
         self.mask_func_acq3 = mask_func_acq3
         self.mask_func_acq4 = mask_func_acq4
         self.mask_func_acq5 = mask_func_acq5
+        self.mask_func_acq6 = mask_func_acq6
+        self.mask_func_acq7 = mask_func_acq7
+        self.mask_func_acq8 = mask_func_acq8
+        self.mask_func_acq9 = mask_func_acq9
         self.use_seed = use_seed
 
     def __call__(
@@ -461,11 +477,19 @@ class QALASDataTransform:
         kspace_acq3: np.ndarray,
         kspace_acq4: np.ndarray,
         kspace_acq5: np.ndarray,
+        kspace_acq6: np.ndarray,
+        kspace_acq7: np.ndarray,
+        kspace_acq8: np.ndarray,
+        kspace_acq9: np.ndarray,
         mask_acq1: np.ndarray,
         mask_acq2: np.ndarray,
         mask_acq3: np.ndarray,
         mask_acq4: np.ndarray,
         mask_acq5: np.ndarray,
+        mask_acq6: np.ndarray,
+        mask_acq7: np.ndarray,
+        mask_acq8: np.ndarray,
+        mask_acq9: np.ndarray,
         mask_brain: np.ndarray,
         # coil_sens: np.ndarray,
         b1: np.ndarray,
@@ -473,6 +497,7 @@ class QALASDataTransform:
         target_t1: Optional[np.ndarray],
         target_t2: Optional[np.ndarray],
         target_pd: Optional[np.ndarray],
+        target_t2s: Optional[np.ndarray],
         attrs: Dict,
         fname: str,
         slice_num: int,
@@ -497,22 +522,30 @@ class QALASDataTransform:
             target_torch_t1 = to_tensor(target_t1)
             target_torch_t2 = to_tensor(target_t2)
             target_torch_pd = to_tensor(target_pd)
+            target_torch_t2s = to_tensor(target_t2s)
             max_value_t1 = attrs["max_t1"]
             max_value_t2 = attrs["max_t2"]
             max_value_pd = attrs["max_pd"]
+            max_value_t2s = attrs["max_t2s"]
         else:
             target_torch_t1 = torch.tensor(0)
             target_torch_t2 = torch.tensor(0)
             target_torch_pd = torch.tensor(0)
+            target_torch_t2s = torch.tensor(0)
             max_value_t1 = 0.0
             max_value_t2 = 0.0
             max_value_pd = 0.0
+            max_value_t2s = 0.0
 
         kspace_torch_acq1 = to_tensor(kspace_acq1)
         kspace_torch_acq2 = to_tensor(kspace_acq2)
         kspace_torch_acq3 = to_tensor(kspace_acq3)
         kspace_torch_acq4 = to_tensor(kspace_acq4)
         kspace_torch_acq5 = to_tensor(kspace_acq5)
+        kspace_torch_acq6 = to_tensor(kspace_acq6)
+        kspace_torch_acq7 = to_tensor(kspace_acq7)
+        kspace_torch_acq8 = to_tensor(kspace_acq8)
+        kspace_torch_acq9 = to_tensor(kspace_acq9)
         mask_brain_torch = to_tensor(mask_brain)
         # coil_sens_torch = to_tensor(coil_sens)
         b1_torch = to_tensor(b1)
@@ -539,6 +572,18 @@ class QALASDataTransform:
             masked_kspace_acq5, mask_torch_acq5, num_low_frequencies = apply_mask(
                 kspace_torch_acq5, self.mask_func_acq5, seed=seed, padding=(acq_start, acq_end)
             )
+            masked_kspace_acq6, mask_torch_acq6, num_low_frequencies = apply_mask(
+                kspace_torch_acq6, self.mask_func_acq6, seed=seed, padding=(acq_start, acq_end)
+            )
+            masked_kspace_acq7, mask_torch_acq7, num_low_frequencies = apply_mask(
+                kspace_torch_acq7, self.mask_func_acq7, seed=seed, padding=(acq_start, acq_end)
+            )
+            masked_kspace_acq8, mask_torch_acq8, num_low_frequencies = apply_mask(
+                kspace_torch_acq8, self.mask_func_acq8, seed=seed, padding=(acq_start, acq_end)
+            )
+            masked_kspace_acq9, mask_torch_acq9, num_low_frequencies = apply_mask(
+                kspace_torch_acq9, self.mask_func_acq9, seed=seed, padding=(acq_start, acq_end)
+            )
 
             sample = QALASSample(
                 masked_kspace_acq1=masked_kspace_acq1,
@@ -546,11 +591,19 @@ class QALASDataTransform:
                 masked_kspace_acq3=masked_kspace_acq3,
                 masked_kspace_acq4=masked_kspace_acq4,
                 masked_kspace_acq5=masked_kspace_acq5,
+                masked_kspace_acq6=masked_kspace_acq2,
+                masked_kspace_acq7=masked_kspace_acq3,
+                masked_kspace_acq8=masked_kspace_acq4,
+                masked_kspace_acq9=masked_kspace_acq5,
                 mask_acq1=mask_torch_acq1.to(torch.bool),
                 mask_acq2=mask_torch_acq2.to(torch.bool),
                 mask_acq3=mask_torch_acq3.to(torch.bool),
                 mask_acq4=mask_torch_acq4.to(torch.bool),
                 mask_acq5=mask_torch_acq5.to(torch.bool),
+                mask_acq2=mask_torch_acq6.to(torch.bool),
+                mask_acq3=mask_torch_acq7.to(torch.bool),
+                mask_acq4=mask_torch_acq8.to(torch.bool),
+                mask_acq5=mask_torch_acq9.to(torch.bool),
                 mask_brain=mask_brain_torch,
                 # coil_sens=coil_sens_torch,
                 b1=b1_torch,
@@ -559,11 +612,13 @@ class QALASDataTransform:
                 target_t1=target_torch_t1,
                 target_t2=target_torch_t2,
                 target_pd=target_torch_pd,
+                target_t2s=target_torch_t2s,
                 fname=fname,
                 slice_num=slice_num,
                 max_value_t1=max_value_t1,
                 max_value_t2=max_value_t2,
                 max_value_pd=max_value_pd,
+                max_value_t2s=max_value_t2s,
                 crop_size=crop_size,
             )
         else:
@@ -572,6 +627,10 @@ class QALASDataTransform:
             masked_kspace_acq3 = kspace_torch_acq3
             masked_kspace_acq4 = kspace_torch_acq4
             masked_kspace_acq5 = kspace_torch_acq5
+            masked_kspace_acq6 = kspace_torch_acq6
+            masked_kspace_acq7 = kspace_torch_acq7
+            masked_kspace_acq8 = kspace_torch_acq8
+            masked_kspace_acq9 = kspace_torch_acq9
             shape = np.array(kspace_torch_acq1.shape)
             num_cols = shape[-2]
             shape[:-3] = 1
@@ -597,6 +656,22 @@ class QALASDataTransform:
             mask_torch_acq5 = mask_torch_acq5.reshape(*mask_shape)
             mask_torch_acq5[:, :, :acq_start] = 0
             mask_torch_acq5[:, :, acq_end:] = 0
+            mask_torch_acq6 = torch.from_numpy(mask_acq6.reshape(*mask_shape).astype(np.float32))
+            mask_torch_acq6 = mask_torch_acq6.reshape(*mask_shape)
+            mask_torch_acq6[:, :, :acq_start] = 0
+            mask_torch_acq6[:, :, acq_end:] = 0
+            mask_torch_acq7 = torch.from_numpy(mask_acq7.reshape(*mask_shape).astype(np.float32))
+            mask_torch_acq7 = mask_torch_acq7.reshape(*mask_shape)
+            mask_torch_acq7[:, :, :acq_start] = 0
+            mask_torch_acq7[:, :, acq_end:] = 0
+            mask_torch_acq8 = torch.from_numpy(mask_acq8.reshape(*mask_shape).astype(np.float32))
+            mask_torch_acq8 = mask_torch_acq8.reshape(*mask_shape)
+            mask_torch_acq8[:, :, :acq_start] = 0
+            mask_torch_acq8[:, :, acq_end:] = 0
+            mask_torch_acq9 = torch.from_numpy(mask_acq9.reshape(*mask_shape).astype(np.float32))
+            mask_torch_acq9 = mask_torch_acq9.reshape(*mask_shape)
+            mask_torch_acq9[:, :, :acq_start] = 0
+            mask_torch_acq9[:, :, acq_end:] = 0
 
             sample = QALASSample(
                 masked_kspace_acq1=masked_kspace_acq1,
@@ -604,11 +679,19 @@ class QALASDataTransform:
                 masked_kspace_acq3=masked_kspace_acq3,
                 masked_kspace_acq4=masked_kspace_acq4,
                 masked_kspace_acq5=masked_kspace_acq5,
+                masked_kspace_acq6=masked_kspace_acq6,
+                masked_kspace_acq7=masked_kspace_acq7,
+                masked_kspace_acq8=masked_kspace_acq8,
+                masked_kspace_acq9=masked_kspace_acq9,
                 mask_acq1=mask_torch_acq1.to(torch.bool),
                 mask_acq2=mask_torch_acq2.to(torch.bool),
                 mask_acq3=mask_torch_acq3.to(torch.bool),
                 mask_acq4=mask_torch_acq4.to(torch.bool),
                 mask_acq5=mask_torch_acq5.to(torch.bool),
+                mask_acq6=mask_torch_acq6.to(torch.bool),
+                mask_acq7=mask_torch_acq7.to(torch.bool),
+                mask_acq8=mask_torch_acq8.to(torch.bool),
+                mask_acq9=mask_torch_acq9.to(torch.bool),
                 mask_brain=mask_brain_torch,
                 # coil_sens=coil_sens_torch,
                 b1=b1_torch,
@@ -617,11 +700,13 @@ class QALASDataTransform:
                 target_t1=target_torch_t1,
                 target_t2=target_torch_t2,
                 target_pd=target_torch_pd,
+                target_t2s=target_torch_t2s,
                 fname=fname,
                 slice_num=slice_num,
                 max_value_t1=max_value_t1,
                 max_value_t2=max_value_t2,
                 max_value_pd=max_value_pd,
+                max_value_t2s=max_value_t2s,
                 crop_size=crop_size,
             )
 
