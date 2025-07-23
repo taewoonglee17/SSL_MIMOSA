@@ -91,79 +91,111 @@ class QALAS_MAPModule(MriModuleQALAS_MAP):
         self.loss_l2_t1 = torch.nn.MSELoss()
         self.loss_l2_t2 = torch.nn.MSELoss()
         self.loss_l2_pd = torch.nn.MSELoss()
+        self.loss_l2_t2s = torch.nn.MSELoss()
         self.loss_l2_img1 = torch.nn.MSELoss()
         self.loss_l2_img2 = torch.nn.MSELoss()
         self.loss_l2_img3 = torch.nn.MSELoss()
         self.loss_l2_img4 = torch.nn.MSELoss()
         self.loss_l2_img5 = torch.nn.MSELoss()
+        self.loss_l2_img6 = torch.nn.MSELoss()
+        self.loss_l2_img7 = torch.nn.MSELoss()
+        self.loss_l2_img8 = torch.nn.MSELoss()
+        self.loss_l2_img9 = torch.nn.MSELoss()
         # self.loss_l2_t1 = fastmri.SSIMLoss()
         # self.loss_l2_t2 = fastmri.SSIMLoss()
         # self.loss_l2_pd = fastmri.SSIMLoss()
+        # self.loss_l2_t2s = fastmri.SSIMLoss()
         # self.loss_l2_img1 = fastmri.SSIMLoss()
         # self.loss_l2_img2 = fastmri.SSIMLoss()
         # self.loss_l2_img3 = fastmri.SSIMLoss()
         # self.loss_l2_img4 = fastmri.SSIMLoss()
         # self.loss_l2_img5 = fastmri.SSIMLoss()
+        # self.loss_l2_img6 = fastmri.SSIMLoss()
+        # self.loss_l2_img7 = fastmri.SSIMLoss()
+        # self.loss_l2_img8 = fastmri.SSIMLoss()
+        # self.loss_l2_img9 = fastmri.SSIMLoss()
 
     def forward(self, masked_kspace_acq1, masked_kspace_acq2, masked_kspace_acq3, masked_kspace_acq4, masked_kspace_acq5, \
-                mask_acq1, mask_acq2, mask_acq3, mask_acq4, mask_acq5, mask_brain, \
-                b1, ie, max_value_t1, max_value_t2, max_value_pd, num_low_frequencies):
+                masked_kspace_acq6, masked_kspace_acq7, masked_kspace_acq8, masked_kspace_acq9, \
+                mask_acq1, mask_acq2, mask_acq3, mask_acq4, mask_acq5, mask_acq6, mask_acq7, mask_acq8, mask_acq9, mask_brain, \
+                b1, ie, max_value_t1, max_value_t2, max_value_pd, max_value_t2s, num_low_frequencies):
         return self.qalas(masked_kspace_acq1, masked_kspace_acq2, masked_kspace_acq3, masked_kspace_acq4, masked_kspace_acq5, \
-                        mask_acq1, mask_acq2, mask_acq3, mask_acq4, mask_acq5, mask_brain, \
-                        b1, ie, max_value_t1, max_value_t2, max_value_pd, num_low_frequencies)
+                        masked_kspace_acq6, masked_kspace_acq7, masked_kspace_acq8, masked_kspace_acq9, \
+                        mask_acq1, mask_acq2, mask_acq3, mask_acq4, mask_acq5, mask_acq6, mask_acq7, mask_acq8, mask_acq9, mask_brain, \
+                        b1, ie, max_value_t1, max_value_t2, max_value_pd, max_value_t2s, num_low_frequencies)
 
     def training_step(self, batch, batch_idx):
         # ie_mat = sio.loadmat('ie_tmp/ie_s' + str(batch_idx+1) + '.mat') # for dict_v4 IE
         # ie = torch.from_numpy(ie_mat['ie']) # for dict_v4 IE
         
-        output_t1, output_t2, output_pd, output_ie, output_b1, \
-        output_img1, output_img2, output_img3, output_img4, output_img5 = \
+        output_t1, output_t2, output_pd, output_ie, output_b1, output_t2s, \
+        output_img1, output_img2, output_img3, output_img4, output_img5, output_img6, output_img7, output_img8, output_img9 = \
             self(batch.masked_kspace_acq1, batch.masked_kspace_acq2, batch.masked_kspace_acq3, batch.masked_kspace_acq4, batch.masked_kspace_acq5, \
-                batch.mask_acq1, batch.mask_acq2, batch.mask_acq3, batch.mask_acq4, batch.mask_acq5, batch.mask_brain, \
-                # batch.b1, ie, batch.max_value_t1, batch.max_value_t2, batch.max_value_pd, batch.num_low_frequencies) # for dict_v4 IE
-                batch.b1, batch.ie, batch.max_value_t1, batch.max_value_t2, batch.max_value_pd, batch.num_low_frequencies)
+                batch.mask_acq1, batch.mask_acq2, batch.mask_acq3, batch.mask_acq4, batch.mask_acq5, batch.mask_acq6, batch.mask_acq7, batch.mask_acq8, batch.mask_acq9, batch.mask_brain, \
+                # batch.b1, ie, batch.max_value_t1, batch.max_value_t2, batch.max_value_pd, batch.max_value_t2s, batch.num_low_frequencies) # for dict_v4 IE
+                batch.b1, batch.ie, batch.max_value_t1, batch.max_value_t2, batch.max_value_pd, batch.max_value_t2s, batch.num_low_frequencies)
 
         # If raw k-space data were used, use following 5 lines
         # img_acq1 = fastmri.complex_abs(fastmri.complex_mul(fastmri.ifft2c(batch.masked_kspace_acq1), fastmri.complex_conj(batch.coil_sens)).sum(dim=1, keepdim=True)) / np.sqrt(batch.masked_kspace_acq1.shape[2] * batch.masked_kspace_acq1.shape[3])
-        # img_acq2 = -fastmri.complex_abs(fastmri.complex_mul(fastmri.ifft2c(batch.masked_kspace_acq2), fastmri.complex_conj(batch.coil_sens)).sum(dim=1, keepdim=True)) / np.sqrt(batch.masked_kspace_acq2.shape[2] * batch.masked_kspace_acq2.shape[3])
+        # img_acq2 = fastmri.complex_abs(fastmri.complex_mul(fastmri.ifft2c(batch.masked_kspace_acq2), fastmri.complex_conj(batch.coil_sens)).sum(dim=1, keepdim=True)) / np.sqrt(batch.masked_kspace_acq2.shape[2] * batch.masked_kspace_acq2.shape[3])
         # img_acq3 = fastmri.complex_abs(fastmri.complex_mul(fastmri.ifft2c(batch.masked_kspace_acq3), fastmri.complex_conj(batch.coil_sens)).sum(dim=1, keepdim=True)) / np.sqrt(batch.masked_kspace_acq3.shape[2] * batch.masked_kspace_acq3.shape[3])
         # img_acq4 = fastmri.complex_abs(fastmri.complex_mul(fastmri.ifft2c(batch.masked_kspace_acq4), fastmri.complex_conj(batch.coil_sens)).sum(dim=1, keepdim=True)) / np.sqrt(batch.masked_kspace_acq4.shape[2] * batch.masked_kspace_acq4.shape[3])
         # img_acq5 = fastmri.complex_abs(fastmri.complex_mul(fastmri.ifft2c(batch.masked_kspace_acq5), fastmri.complex_conj(batch.coil_sens)).sum(dim=1, keepdim=True)) / np.sqrt(batch.masked_kspace_acq5.shape[2] * batch.masked_kspace_acq5.shape[3])
-
+        # img_acq6 = fastmri.complex_abs(fastmri.complex_mul(fastmri.ifft2c(batch.masked_kspace_acq6), fastmri.complex_conj(batch.coil_sens)).sum(dim=1, keepdim=True)) / np.sqrt(batch.masked_kspace_acq6.shape[2] * batch.masked_kspace_acq6.shape[3])
+        # img_acq7 = fastmri.complex_abs(fastmri.complex_mul(fastmri.ifft2c(batch.masked_kspace_acq7), fastmri.complex_conj(batch.coil_sens)).sum(dim=1, keepdim=True)) / np.sqrt(batch.masked_kspace_acq7.shape[2] * batch.masked_kspace_acq7.shape[3])
+        # img_acq8 = fastmri.complex_abs(fastmri.complex_mul(fastmri.ifft2c(batch.masked_kspace_acq8), fastmri.complex_conj(batch.coil_sens)).sum(dim=1, keepdim=True)) / np.sqrt(batch.masked_kspace_acq8.shape[2] * batch.masked_kspace_acq8.shape[3])
+        # img_acq9 = fastmri.complex_abs(fastmri.complex_mul(fastmri.ifft2c(batch.masked_kspace_acq9), fastmri.complex_conj(batch.coil_sens)).sum(dim=1, keepdim=True)) / np.sqrt(batch.masked_kspace_acq9.shape[2] * batch.masked_kspace_acq9.shape[3])
+        
         # If DICOM data were used, use following 5 lines
         img_acq1 = batch.masked_kspace_acq1
         img_acq2 = batch.masked_kspace_acq2
         img_acq3 = batch.masked_kspace_acq3
         img_acq4 = batch.masked_kspace_acq4
         img_acq5 = batch.masked_kspace_acq5
+        img_acq6 = batch.masked_kspace_acq6
+        img_acq7 = batch.masked_kspace_acq7
+        img_acq8 = batch.masked_kspace_acq8
+        img_acq9 = batch.masked_kspace_acq9
+
 
         target_t1, output_t1 = transforms_qalas.center_crop_to_smallest(batch.target_t1, output_t1)
         target_t2, output_t2 = transforms_qalas.center_crop_to_smallest(batch.target_t2, output_t2)
         target_pd, output_pd = transforms_qalas.center_crop_to_smallest(batch.target_pd, output_pd)
         target_pd, output_ie = transforms_qalas.center_crop_to_smallest(batch.target_pd, output_ie)
         target_pd, output_b1 = transforms_qalas.center_crop_to_smallest(batch.target_pd, output_b1)
+        target_t2s, output_t2s = transforms_qalas.center_crop_to_smallest(batch.target_t2s, output_t2s)
 
         target_t1, img_acq1 = transforms_qalas.center_crop_to_smallest(batch.target_t1, img_acq1.squeeze(1))
         target_t1, img_acq2 = transforms_qalas.center_crop_to_smallest(batch.target_t1, img_acq2.squeeze(1))
         target_t1, img_acq3 = transforms_qalas.center_crop_to_smallest(batch.target_t1, img_acq3.squeeze(1))
         target_t1, img_acq4 = transforms_qalas.center_crop_to_smallest(batch.target_t1, img_acq4.squeeze(1))
         target_t1, img_acq5 = transforms_qalas.center_crop_to_smallest(batch.target_t1, img_acq5.squeeze(1))
+        target_t1, img_acq6 = transforms_qalas.center_crop_to_smallest(batch.target_t1, img_acq6.squeeze(1))
+        target_t1, img_acq7 = transforms_qalas.center_crop_to_smallest(batch.target_t1, img_acq7.squeeze(1))
+        target_t1, img_acq8 = transforms_qalas.center_crop_to_smallest(batch.target_t1, img_acq8.squeeze(1))
+        target_t1, img_acq9 = transforms_qalas.center_crop_to_smallest(batch.target_t1, img_acq9.squeeze(1))
 
         target_t1, output_img1 = transforms_qalas.center_crop_to_smallest(batch.target_t1, output_img1.squeeze(1))
         target_t1, output_img2 = transforms_qalas.center_crop_to_smallest(batch.target_t1, output_img2.squeeze(1))
         target_t1, output_img3 = transforms_qalas.center_crop_to_smallest(batch.target_t1, output_img3.squeeze(1))
         target_t1, output_img4 = transforms_qalas.center_crop_to_smallest(batch.target_t1, output_img4.squeeze(1))
         target_t1, output_img5 = transforms_qalas.center_crop_to_smallest(batch.target_t1, output_img5.squeeze(1))
+        target_t1, output_img6 = transforms_qalas.center_crop_to_smallest(batch.target_t1, output_img6.squeeze(1))
+        target_t1, output_img7 = transforms_qalas.center_crop_to_smallest(batch.target_t1, output_img7.squeeze(1))
+        target_t1, output_img8 = transforms_qalas.center_crop_to_smallest(batch.target_t1, output_img8.squeeze(1))
+        target_t1, output_img9 = transforms_qalas.center_crop_to_smallest(batch.target_t1, output_img9.squeeze(1))
 
         target_t1 = target_t1 * batch.mask_brain
         target_t2 = target_t2 * batch.mask_brain
         target_pd = target_pd * batch.mask_brain
+        target_t2s = target_t2s * batch.mask_brain
 
         output_t1 = output_t1 * batch.mask_brain
         output_t2 = output_t2 * batch.mask_brain
         output_pd = output_pd * batch.mask_brain
         output_ie = output_ie * batch.mask_brain
         output_b1 = output_b1 * batch.mask_brain
+        output_t2s = output_t2s * batch.mask_brain
 
         ### for dict_v4 IE
         # b, nx, ny = output_ie.shape
@@ -183,42 +215,65 @@ class QALAS_MAPModule(MriModuleQALAS_MAP):
         img_acq3 = img_acq3 * batch.mask_brain
         img_acq4 = img_acq4 * batch.mask_brain
         img_acq5 = img_acq5 * batch.mask_brain
+        img_acq6 = img_acq6 * batch.mask_brain
+        img_acq7 = img_acq7 * batch.mask_brain
+        img_acq8 = img_acq8 * batch.mask_brain
+        img_acq9 = img_acq9 * batch.mask_brain
 
         output_img1 = output_img1 * batch.mask_brain
         output_img2 = output_img2 * batch.mask_brain
         output_img3 = output_img3 * batch.mask_brain
         output_img4 = output_img4 * batch.mask_brain
         output_img5 = output_img5 * batch.mask_brain
+        output_img6 = output_img6 * batch.mask_brain
+        output_img7 = output_img7 * batch.mask_brain
+        output_img8 = output_img8 * batch.mask_brain
+        output_img9 = output_img9 * batch.mask_brain
 
         if batch.mask_brain.sum() == 0:
             target_t1 = target_t1 + 1e-5
             target_t2 = target_t2 + 1e-5
             target_pd = target_pd + 1e-5
+            target_t2s = target_t2s + 1e-5
             output_t1 = output_t1 + 1e-5
             output_t2 = output_t2 + 1e-5
             output_pd = output_pd + 1e-5
             output_ie = output_ie + 1e-5
             output_b1 = output_b1 + 1e-5
+            output_t2s = output_t2s + 1e-5
             img_acq1 = img_acq1 + 1e-5
             img_acq2 = img_acq2 + 1e-5
             img_acq3 = img_acq3 + 1e-5
             img_acq4 = img_acq4 + 1e-5
             img_acq5 = img_acq5 + 1e-5
+            img_acq6 = img_acq6 + 1e-5
+            img_acq7 = img_acq7 + 1e-5
+            img_acq8 = img_acq8 + 1e-5
+            img_acq9 = img_acq9 + 1e-5
             output_img1 = output_img1 + 1e-5
             output_img2 = output_img2 + 1e-5
             output_img3 = output_img3 + 1e-5
             output_img4 = output_img4 + 1e-5
             output_img5 = output_img5 + 1e-5
+            output_img6 = output_img6 + 1e-5
+            output_img7 = output_img7 + 1e-5
+            output_img8 = output_img8 + 1e-5
+            output_img9 = output_img9 + 1e-5
 
         loss_t1 = self.loss_l2_t1(output_t1.unsqueeze(1), target_t1.unsqueeze(1))
         loss_t2 = self.loss_l2_t2(output_t2.unsqueeze(1), target_t2.unsqueeze(1))
         loss_pd = self.loss_l2_pd(output_pd.unsqueeze(1) / output_pd.max(), target_pd.unsqueeze(1) / target_pd.max())
         # loss_pd = self.loss_l2_pd(output_ie.unsqueeze(1), target_pd.unsqueeze(1))
+        loss_t2s = self.loss_l2_t2s(output_t2s.unsqueeze(1), target_t2s.unsqueeze(1))
         loss_img1 = self.loss_l2_img1(output_img1.unsqueeze(1), img_acq1.unsqueeze(1))
         loss_img2 = self.loss_l2_img2(output_img2.unsqueeze(1), img_acq2.unsqueeze(1))
         loss_img3 = self.loss_l2_img3(output_img3.unsqueeze(1), img_acq3.unsqueeze(1))
         loss_img4 = self.loss_l2_img4(output_img4.unsqueeze(1), img_acq4.unsqueeze(1))
         loss_img5 = self.loss_l2_img5(output_img5.unsqueeze(1), img_acq5.unsqueeze(1))
+        loss_img6 = self.loss_l2_img6(output_img6.unsqueeze(1), img_acq6.unsqueeze(1))
+        loss_img7 = self.loss_l2_img7(output_img7.unsqueeze(1), img_acq7.unsqueeze(1))
+        loss_img8 = self.loss_l2_img8(output_img8.unsqueeze(1), img_acq8.unsqueeze(1))
+        loss_img9 = self.loss_l2_img9(output_img9.unsqueeze(1), img_acq9.unsqueeze(1))
         def loss_tv(img):
             pixel_dif1 = img[..., 1:,:] - img[..., :-1,:]
             pixel_dif2 = img[..., :,1:] - img[..., :,:-1]
@@ -231,53 +286,78 @@ class QALAS_MAPModule(MriModuleQALAS_MAP):
         loss_img3_tv = loss_tv(output_img3)
         loss_img4_tv = loss_tv(output_img4)
         loss_img5_tv = loss_tv(output_img5)
+        loss_img6_tv = loss_tv(output_img6)
+        loss_img7_tv = loss_tv(output_img7)
+        loss_img8_tv = loss_tv(output_img8)
+        loss_img9_tv = loss_tv(output_img9)
         loss_t1_tv = loss_tv(output_t1)
         loss_t2_tv = loss_tv(output_t2)
         loss_pd_tv = loss_tv(output_pd)
         loss_ie_tv = loss_tv(output_ie)
+        loss_t2s_tv = loss_tv(output_t2s)
 
         loss_weight_t1 = 0
         loss_weight_t2 = 0
         loss_weight_pd = 0
+        loss_weight_t2s = 0
         loss_weight_img1 = 1
         loss_weight_img2 = 1
         loss_weight_img3 = 1
         loss_weight_img4 = 1
         loss_weight_img5 = 1
+        loss_weight_img6 = 1
+        loss_weight_img7 = 1
+        loss_weight_img8 = 1
+        loss_weight_img9 = 1
         loss_weight_img1_tv = 0
         loss_weight_img2_tv = 0
         loss_weight_img3_tv = 0
         loss_weight_img4_tv = 0
         loss_weight_img5_tv = 0
+        loss_weight_img6_tv = 0
+        loss_weight_img7_tv = 0
+        loss_weight_img8_tv = 0
+        loss_weight_img9_tv = 0
         loss_weight_t1_tv = 0 # 5e-5 / 2e-4 / 1e-4
         loss_weight_t2_tv = 0 # 5e-5 / 2e-4 / 1e-4
         loss_weight_pd_tv = 0 # 5e-5 / 2e-4 / 1e-4
         loss_weight_ie_tv = 0 # 5e-5 / 2e-4 / 1e-4
-        # loss = (loss_t1 * loss_weight_t1 + loss_t2 * loss_weight_t2 + loss_pd * loss_weight_pd + \
-        #         loss_img1 * loss_weight_img1 + loss_img2 * loss_weight_img2 + loss_img3 * loss_weight_img3 + loss_img4 * loss_weight_img4 + loss_img5 * loss_weight_img5) \
-        #          / (loss_weight_t1 + loss_weight_t2 + loss_weight_pd + \
-        #             loss_weight_img1 + loss_weight_img2 + loss_weight_img3 + loss_weight_img4 + loss_weight_img5)
-        # loss = (loss_t1 * loss_weight_t1 + loss_t2 * loss_weight_t2 + loss_pd * loss_weight_pd + \
+        loss_weight_t2s_tv = 0 # 5e-5 / 2e-4 / 1e-4
+        
+        # loss = (loss_t1 * loss_weight_t1 + loss_t2 * loss_weight_t2 + loss_pd * loss_weight_pd + loss_t2s * loss_weight_t2s + \
         #         loss_img1 * loss_weight_img1 + loss_img2 * loss_weight_img2 + loss_img3 * loss_weight_img3 + loss_img4 * loss_weight_img4 + loss_img5 * loss_weight_img5 + \
-        #         loss_img1_tv * loss_weight_img1_tv + loss_img2_tv * loss_weight_img2_tv + loss_img3_tv * loss_weight_img3_tv + loss_img4_tv * loss_weight_img4_tv + loss_img5_tv * loss_weight_img5_tv) \
-        #          / (loss_weight_t1 + loss_weight_t2 + loss_weight_pd + \
-        #             loss_weight_img1 + loss_weight_img2 + loss_weight_img3 + loss_weight_img4 + loss_weight_img5 + \
-        #             loss_weight_img1_tv + loss_weight_img2_tv + loss_weight_img3_tv + loss_weight_img4_tv + loss_weight_img5_tv)
-        loss = (loss_t1 * loss_weight_t1 + loss_t2 * loss_weight_t2 + loss_pd * loss_weight_pd + \
+        #         loss_img6 * loss_weight_img6 + loss_img7 * loss_weight_img7 + loss_img8 * loss_weight_img8 + loss_img9 * loss_weight_img9) \
+        #          / (loss_weight_t1 + loss_weight_t2 + loss_weight_pd + loss_weight_t2s + \
+        #             loss_weight_img1 + loss_weight_img2 + loss_weight_img3 + loss_weight_img4 + loss_weight_img5 + loss_weight_img6 + loss_weight_img7 + loss_weight_img8 + loss_weight_img9)
+        # loss = (loss_t1 * loss_weight_t1 + loss_t2 * loss_weight_t2 + loss_pd * loss_weight_pd + loss_t2s * loss_weight_t2s + \
+        #         loss_img1 * loss_weight_img1 + loss_img2 * loss_weight_img2 + loss_img3 * loss_weight_img3 + loss_img4 * loss_weight_img4 + loss_img5 * loss_weight_img5 + \
+        #         loss_img6 * loss_weight_img6 + loss_img7 * loss_weight_img7 + loss_img8 * loss_weight_img8 + loss_img9 * loss_weight_img9 + \
+        #         loss_img1_tv * loss_weight_img1_tv + loss_img2_tv * loss_weight_img2_tv + loss_img3_tv * loss_weight_img3_tv + loss_img4_tv * loss_weight_img4_tv + loss_img5_tv * loss_weight_img5_tv + \
+        #         loss_img6_tv * loss_weight_img6_tv + loss_img7_tv * loss_weight_img7_tv + loss_img8_tv * loss_weight_img8_tv + loss_img9_tv * loss_weight_img9_tv) \
+        #          / (loss_weight_t1 + loss_weight_t2 + loss_weight_pd + loss_weight_t2s + \
+        #             loss_weight_img1 + loss_weight_img2 + loss_weight_img3 + loss_weight_img4 + loss_weight_img5 + + loss_weight_img6 + loss_weight_img7 + loss_weight_img8 + loss_weight_img9 + \
+        #             loss_weight_img1_tv + loss_weight_img2_tv + loss_weight_img3_tv + loss_weight_img4_tv + loss_weight_img5_tv + loss_weight_img6_tv + loss_weight_img7_tv + loss_weight_img8_tv + loss_weight_img9_tv)
+        loss = (loss_t1 * loss_weight_t1 + loss_t2 * loss_weight_t2 + loss_pd * loss_weight_pd + loss_t2s * loss_weight_t2s + \
                 loss_img1 * loss_weight_img1 + loss_img2 * loss_weight_img2 + loss_img3 * loss_weight_img3 + loss_img4 * loss_weight_img4 + loss_img5 * loss_weight_img5 + \
-                loss_t1_tv * loss_weight_t1_tv + loss_t2_tv * loss_weight_t2_tv + loss_pd_tv * loss_weight_pd_tv + loss_ie_tv * loss_weight_ie_tv) \
-                 / (loss_weight_t1 + loss_weight_t2 + loss_weight_pd + \
-                    loss_weight_img1 + loss_weight_img2 + loss_weight_img3 + loss_weight_img4 + loss_weight_img5 + \
-                    loss_weight_t1_tv + loss_weight_t2_tv + loss_weight_pd_tv + loss_weight_ie_tv)
+                loss_img6 * loss_weight_img6 + loss_img7 * loss_weight_img7 + loss_img8 * loss_weight_img8 + loss_img9 * loss_weight_img9 + \
+                loss_t1_tv * loss_weight_t1_tv + loss_t2_tv * loss_weight_t2_tv + loss_pd_tv * loss_weight_pd_tv + loss_ie_tv * loss_weight_ie_tv + loss_t2s_tv * loss_weight_t2s_tv) \
+                 / (loss_weight_t1 + loss_weight_t2 + loss_weight_pd + loss_weight_t2s + \
+                    loss_weight_img1 + loss_weight_img2 + loss_weight_img3 + loss_weight_img4 + loss_weight_img5 + loss_weight_img6 + loss_weight_img7 + loss_weight_img8 + loss_weight_img9 + \
+                    loss_weight_t1_tv + loss_weight_t2_tv + loss_weight_pd_tv + loss_weight_ie_tv + loss_weight_t2s_tv)
 
         self.log("train_loss_t1", loss_t1)
         self.log("train_loss_t2", loss_t2)
         self.log("train_loss_pd", loss_pd)
+        self.log("train_loss_t2s", loss_t2s)
         self.log("train_loss_img1", loss_img1)
         self.log("train_loss_img2", loss_img2)
         self.log("train_loss_img3", loss_img3)
         self.log("train_loss_img4", loss_img4)
         self.log("train_loss_img5", loss_img5)
+        self.log("train_loss_img6", loss_img6)
+        self.log("train_loss_img7", loss_img7)
+        self.log("train_loss_img8", loss_img8)
+        self.log("train_loss_img9", loss_img9)
 
         return loss
 
@@ -286,19 +366,25 @@ class QALAS_MAPModule(MriModuleQALAS_MAP):
         # ie_mat = sio.loadmat('ie_tmp/ie_s' + str(batch_idx+1) + '.mat') # for dict_v4 IE
         # ie = torch.from_numpy(ie_mat['ie']) # for dict_v4 IE
 
-        output_t1, output_t2, output_pd, output_ie, output_b1, \
-        output_img1, output_img2, output_img3, output_img4, output_img5 = \
+        output_t1, output_t2, output_pd, output_ie, output_b1, output_t2s, \
+        output_img1, output_img2, output_img3, output_img4, output_img5, output_img6, output_img7, output_img8, output_img9 = \
             self.forward(batch.masked_kspace_acq1, batch.masked_kspace_acq2, batch.masked_kspace_acq3, batch.masked_kspace_acq4, batch.masked_kspace_acq5, \
-                        batch.mask_acq1, batch.mask_acq2, batch.mask_acq3, batch.mask_acq4, batch.mask_acq5, batch.mask_brain, \
-                        # batch.b1, ie, batch.max_value_t1, batch.max_value_t2, batch.max_value_pd, batch.num_low_frequencies) # for dict_v4 IE
-                        batch.b1, batch.ie, batch.max_value_t1, batch.max_value_t2, batch.max_value_pd, batch.num_low_frequencies)
+                         batch.masked_kspace_acq6, batch.masked_kspace_acq7, batch.masked_kspace_acq8, batch.masked_kspace_acq9, \
+                        batch.mask_acq1, batch.mask_acq2, batch.mask_acq3, batch.mask_acq4, batch.mask_acq5, \
+                        batch.mask_acq6, batch.mask_acq7, batch.mask_acq8, batch.mask_acq9, batch.mask_brain, \
+                        # batch.b1, ie, batch.max_value_t1, batch.max_value_t2, batch.max_value_pd, batch.max_value_t2s, batch.num_low_frequencies) # for dict_v4 IE
+                        batch.b1, batch.ie, batch.max_value_t1, batch.max_value_t2, batch.max_value_pd, batch.max_value_t2s, batch.num_low_frequencies)
 
         # If raw k-space data were used, use following 5 lines
         # img_acq1 = fastmri.complex_abs(fastmri.complex_mul(fastmri.ifft2c(batch.masked_kspace_acq1), fastmri.complex_conj(batch.coil_sens)).sum(dim=1, keepdim=True)) / np.sqrt(batch.masked_kspace_acq1.shape[2] * batch.masked_kspace_acq1.shape[3])
-        # img_acq2 = -fastmri.complex_abs(fastmri.complex_mul(fastmri.ifft2c(batch.masked_kspace_acq2), fastmri.complex_conj(batch.coil_sens)).sum(dim=1, keepdim=True)) / np.sqrt(batch.masked_kspace_acq2.shape[2] * batch.masked_kspace_acq2.shape[3])
+        # img_acq2 = fastmri.complex_abs(fastmri.complex_mul(fastmri.ifft2c(batch.masked_kspace_acq2), fastmri.complex_conj(batch.coil_sens)).sum(dim=1, keepdim=True)) / np.sqrt(batch.masked_kspace_acq2.shape[2] * batch.masked_kspace_acq2.shape[3])
         # img_acq3 = fastmri.complex_abs(fastmri.complex_mul(fastmri.ifft2c(batch.masked_kspace_acq3), fastmri.complex_conj(batch.coil_sens)).sum(dim=1, keepdim=True)) / np.sqrt(batch.masked_kspace_acq3.shape[2] * batch.masked_kspace_acq3.shape[3])
         # img_acq4 = fastmri.complex_abs(fastmri.complex_mul(fastmri.ifft2c(batch.masked_kspace_acq4), fastmri.complex_conj(batch.coil_sens)).sum(dim=1, keepdim=True)) / np.sqrt(batch.masked_kspace_acq4.shape[2] * batch.masked_kspace_acq4.shape[3])
         # img_acq5 = fastmri.complex_abs(fastmri.complex_mul(fastmri.ifft2c(batch.masked_kspace_acq5), fastmri.complex_conj(batch.coil_sens)).sum(dim=1, keepdim=True)) / np.sqrt(batch.masked_kspace_acq5.shape[2] * batch.masked_kspace_acq5.shape[3])
+        # img_acq6 = fastmri.complex_abs(fastmri.complex_mul(fastmri.ifft2c(batch.masked_kspace_acq6), fastmri.complex_conj(batch.coil_sens)).sum(dim=1, keepdim=True)) / np.sqrt(batch.masked_kspace_acq6.shape[2] * batch.masked_kspace_acq6.shape[3])
+        # img_acq7 = fastmri.complex_abs(fastmri.complex_mul(fastmri.ifft2c(batch.masked_kspace_acq7), fastmri.complex_conj(batch.coil_sens)).sum(dim=1, keepdim=True)) / np.sqrt(batch.masked_kspace_acq7.shape[2] * batch.masked_kspace_acq7.shape[3])
+        # img_acq8 = fastmri.complex_abs(fastmri.complex_mul(fastmri.ifft2c(batch.masked_kspace_acq8), fastmri.complex_conj(batch.coil_sens)).sum(dim=1, keepdim=True)) / np.sqrt(batch.masked_kspace_acq8.shape[2] * batch.masked_kspace_acq8.shape[3])
+        # img_acq9 = fastmri.complex_abs(fastmri.complex_mul(fastmri.ifft2c(batch.masked_kspace_acq9), fastmri.complex_conj(batch.coil_sens)).sum(dim=1, keepdim=True)) / np.sqrt(batch.masked_kspace_acq9.shape[2] * batch.masked_kspace_acq9.shape[3])
 
         # If DICOM data were used, use following 5 lines
         img_acq1 = batch.masked_kspace_acq1
@@ -306,34 +392,49 @@ class QALAS_MAPModule(MriModuleQALAS_MAP):
         img_acq3 = batch.masked_kspace_acq3
         img_acq4 = batch.masked_kspace_acq4
         img_acq5 = batch.masked_kspace_acq5
+        img_acq6 = batch.masked_kspace_acq6
+        img_acq7 = batch.masked_kspace_acq7
+        img_acq8 = batch.masked_kspace_acq8
+        img_acq9 = batch.masked_kspace_acq9
 
         target_t1, output_t1 = transforms_qalas.center_crop_to_smallest(batch.target_t1, output_t1)
         target_t2, output_t2 = transforms_qalas.center_crop_to_smallest(batch.target_t2, output_t2)
         target_pd, output_pd = transforms_qalas.center_crop_to_smallest(batch.target_pd, output_pd)
         target_pd, output_ie = transforms_qalas.center_crop_to_smallest(batch.target_pd, output_ie)
         target_pd, output_b1 = transforms_qalas.center_crop_to_smallest(batch.target_pd, output_b1)
+        target_t2s, output_t2s = transforms_qalas.center_crop_to_smallest(batch.target_t2s, output_t2s)
 
         target_t1, img_acq1 = transforms_qalas.center_crop_to_smallest(batch.target_t1, img_acq1.squeeze(1))
         target_t1, img_acq2 = transforms_qalas.center_crop_to_smallest(batch.target_t1, img_acq2.squeeze(1))
         target_t1, img_acq3 = transforms_qalas.center_crop_to_smallest(batch.target_t1, img_acq3.squeeze(1))
         target_t1, img_acq4 = transforms_qalas.center_crop_to_smallest(batch.target_t1, img_acq4.squeeze(1))
         target_t1, img_acq5 = transforms_qalas.center_crop_to_smallest(batch.target_t1, img_acq5.squeeze(1))
+        target_t1, img_acq6 = transforms_qalas.center_crop_to_smallest(batch.target_t1, img_acq6.squeeze(1))
+        target_t1, img_acq7 = transforms_qalas.center_crop_to_smallest(batch.target_t1, img_acq7.squeeze(1))
+        target_t1, img_acq8 = transforms_qalas.center_crop_to_smallest(batch.target_t1, img_acq8.squeeze(1))
+        target_t1, img_acq9 = transforms_qalas.center_crop_to_smallest(batch.target_t1, img_acq9.squeeze(1))
 
         target_t1, output_img1 = transforms_qalas.center_crop_to_smallest(batch.target_t1, output_img1.squeeze(1))
         target_t1, output_img2 = transforms_qalas.center_crop_to_smallest(batch.target_t1, output_img2.squeeze(1))
         target_t1, output_img3 = transforms_qalas.center_crop_to_smallest(batch.target_t1, output_img3.squeeze(1))
         target_t1, output_img4 = transforms_qalas.center_crop_to_smallest(batch.target_t1, output_img4.squeeze(1))
         target_t1, output_img5 = transforms_qalas.center_crop_to_smallest(batch.target_t1, output_img5.squeeze(1))
+        target_t1, output_img6 = transforms_qalas.center_crop_to_smallest(batch.target_t1, output_img6.squeeze(1))
+        target_t1, output_img7 = transforms_qalas.center_crop_to_smallest(batch.target_t1, output_img7.squeeze(1))
+        target_t1, output_img8 = transforms_qalas.center_crop_to_smallest(batch.target_t1, output_img8.squeeze(1))
+        target_t1, output_img9 = transforms_qalas.center_crop_to_smallest(batch.target_t1, output_img9.squeeze(1))
 
         target_t1 = target_t1 * batch.mask_brain
         target_t2 = target_t2 * batch.mask_brain
         target_pd = target_pd * batch.mask_brain
+        target_t2s = target_t2s * batch.mask_brain
 
         output_t1 = output_t1 * batch.mask_brain
         output_t2 = output_t2 * batch.mask_brain
         output_pd = output_pd * batch.mask_brain
         output_ie = output_ie * batch.mask_brain
         output_b1 = output_b1 * batch.mask_brain
+        output_t2s = output_t2s * batch.mask_brain
 
         ### for dict_v4 IE
         # b, nx, ny = output_ie.shape
@@ -353,32 +454,50 @@ class QALAS_MAPModule(MriModuleQALAS_MAP):
         img_acq3 = img_acq3 * batch.mask_brain
         img_acq4 = img_acq4 * batch.mask_brain
         img_acq5 = img_acq5 * batch.mask_brain
+        img_acq6 = img_acq6 * batch.mask_brain
+        img_acq7 = img_acq7 * batch.mask_brain
+        img_acq8 = img_acq8 * batch.mask_brain
+        img_acq9 = img_acq9 * batch.mask_brain
 
         output_img1 = output_img1 * batch.mask_brain
         output_img2 = output_img2 * batch.mask_brain
         output_img3 = output_img3 * batch.mask_brain
         output_img4 = output_img4 * batch.mask_brain
         output_img5 = output_img5 * batch.mask_brain
+        output_img6 = output_img6 * batch.mask_brain
+        output_img7 = output_img7 * batch.mask_brain
+        output_img8 = output_img8 * batch.mask_brain
+        output_img9 = output_img9 * batch.mask_brain
 
         if batch.mask_brain.sum() == 0:
             target_t1 = target_t1 + 1e-5
             target_t2 = target_t2 + 1e-5
             target_pd = target_pd + 1e-5
+            target_t2s = target_t2s + 1e-5
             output_t1 = output_t1 + 1e-5
             output_t2 = output_t2 + 1e-5
             output_pd = output_pd + 1e-5
             output_ie = output_ie + 1e-5
             output_b1 = output_b1 + 1e-5
+            output_t2s = output_t2s + 1e-5
             img_acq1 = img_acq1 + 1e-5
             img_acq2 = img_acq2 + 1e-5
             img_acq3 = img_acq3 + 1e-5
             img_acq4 = img_acq4 + 1e-5
             img_acq5 = img_acq5 + 1e-5
+            img_acq6 = img_acq6 + 1e-5
+            img_acq7 = img_acq7 + 1e-5
+            img_acq8 = img_acq8 + 1e-5
+            img_acq9 = img_acq9 + 1e-5
             output_img1 = output_img1 + 1e-5
             output_img2 = output_img2 + 1e-5
             output_img3 = output_img3 + 1e-5
             output_img4 = output_img4 + 1e-5
             output_img5 = output_img5 + 1e-5
+            output_img6 = output_img6 + 1e-5
+            output_img7 = output_img7 + 1e-5
+            output_img8 = output_img8 + 1e-5
+            output_img9 = output_img9 + 1e-5
         
         # ie = output_ie.squeeze(0).detach().cpu().numpy() # for dict_v4 IE
         # sio.savemat('ie_tmp/ie_s' + str(batch_idx+1) + '.mat',{'ie':ie}) # for dict_v4 IE
@@ -395,20 +514,33 @@ class QALAS_MAPModule(MriModuleQALAS_MAP):
         loss_img3_tv = loss_tv(output_img3)
         loss_img4_tv = loss_tv(output_img4)
         loss_img5_tv = loss_tv(output_img5)
+        loss_img6_tv = loss_tv(output_img6)
+        loss_img7_tv = loss_tv(output_img7)
+        loss_img8_tv = loss_tv(output_img8)
+        loss_img9_tv = loss_tv(output_img9)
 
         loss_weight_t1 = 0
         loss_weight_t2 = 0
         loss_weight_pd = 0
+        loss_weight_t2s = 0
         loss_weight_img1 = 1
         loss_weight_img2 = 1
         loss_weight_img3 = 1
         loss_weight_img4 = 1
         loss_weight_img5 = 1
+        loss_weight_img6 = 1
+        loss_weight_img7 = 1
+        loss_weight_img8 = 1
+        loss_weight_img9 = 1
         loss_weight_img1_tv = 0
         loss_weight_img2_tv = 0
         loss_weight_img3_tv = 0
         loss_weight_img4_tv = 0
         loss_weight_img5_tv = 0
+        loss_weight_img6_tv = 0
+        loss_weight_img7_tv = 0
+        loss_weight_img8_tv = 0
+        loss_weight_img9_tv = 0
 
         return {
             "batch_idx": batch_idx,
@@ -417,40 +549,61 @@ class QALAS_MAPModule(MriModuleQALAS_MAP):
             "max_value_t1": batch.max_value_t1,
             "max_value_t2": batch.max_value_t2,
             "max_value_pd": torch.ones_like(batch.max_value_t1),
+            "max_value_t2s": batch.max_value_t2s,
             "output_t1": output_t1,
             "output_t2": output_t2,
             "output_pd": output_pd,
             "output_ie": output_ie,
             "output_b1": output_b1,
+            "output_t2s": output_t2s,
             "output_img1": torch.abs(output_img1),
             "output_img2": torch.abs(output_img2),
             "output_img3": torch.abs(output_img3),
             "output_img4": torch.abs(output_img4),
             "output_img5": torch.abs(output_img5),
+            "output_img6": torch.abs(output_img6),
+            "output_img7": torch.abs(output_img7),
+            "output_img8": torch.abs(output_img8),
+            "output_img9": torch.abs(output_img9),
             "target_t1": target_t1,
             "target_t2": target_t2,
             "target_pd": target_pd,
+            "target_t2s": target_t2s,
             "target_img1": torch.abs(img_acq1),
             "target_img2": torch.abs(img_acq2),
             "target_img3": torch.abs(img_acq3),
             "target_img4": torch.abs(img_acq4),
             "target_img5": torch.abs(img_acq5),
+            "target_img6": torch.abs(img_acq6),
+            "target_img7": torch.abs(img_acq7),
+            "target_img8": torch.abs(img_acq8),
+            "target_img9": torch.abs(img_acq9),
             "val_loss_t1": self.loss_l2_t1(output_t1.unsqueeze(1), target_t1.unsqueeze(1)),
             "val_loss_t2": self.loss_l2_t2(output_t2.unsqueeze(1), target_t2.unsqueeze(1)),
             "val_loss_pd": self.loss_l2_pd(output_pd.unsqueeze(1) / output_pd.max(), target_pd.unsqueeze(1) / target_pd.max()),
+            "val_loss_t2s": self.loss_l2_t2s(output_t2s.unsqueeze(1), target_t2s.unsqueeze(1)),
             "val_loss_img1": self.loss_l2_img1(output_img1.unsqueeze(1), img_acq1.unsqueeze(1)),
             "val_loss_img2": self.loss_l2_img2(output_img2.unsqueeze(1), img_acq2.unsqueeze(1)),
             "val_loss_img3": self.loss_l2_img3(output_img3.unsqueeze(1), img_acq3.unsqueeze(1)),
             "val_loss_img4": self.loss_l2_img4(output_img4.unsqueeze(1), img_acq4.unsqueeze(1)),
             "val_loss_img5": self.loss_l2_img5(output_img5.unsqueeze(1), img_acq5.unsqueeze(1)),
+            "val_loss_img6": self.loss_l2_img6(output_img6.unsqueeze(1), img_acq6.unsqueeze(1)),
+            "val_loss_img7": self.loss_l2_img7(output_img7.unsqueeze(1), img_acq7.unsqueeze(1)),
+            "val_loss_img8": self.loss_l2_img8(output_img8.unsqueeze(1), img_acq8.unsqueeze(1)),
+            "val_loss_img9": self.loss_l2_img9(output_img9.unsqueeze(1), img_acq9.unsqueeze(1)),
             "loss_weight_t1": loss_weight_t1,
             "loss_weight_t2": loss_weight_t2,
             "loss_weight_pd": loss_weight_pd,
+            "loss_weight_t2s": loss_weight_t2s,
             "loss_weight_img1": loss_weight_img1,
             "loss_weight_img2": loss_weight_img2,
             "loss_weight_img3": loss_weight_img3,
             "loss_weight_img4": loss_weight_img4,
             "loss_weight_img5": loss_weight_img5,
+            "loss_weight_img6": loss_weight_img6,
+            "loss_weight_img7": loss_weight_img7,
+            "loss_weight_img8": loss_weight_img8,
+            "loss_weight_img9": loss_weight_img9,
         }
 
 
@@ -458,12 +611,14 @@ class QALAS_MAPModule(MriModuleQALAS_MAP):
         # ie_mat = sio.loadmat('ie_tmp/ie_s' + str(batch_idx+1) + '.mat') # for dict_v4 IE
         # ie = torch.from_numpy(ie_mat['ie']) # for dict_v4 IE
 
-        output_t1, output_t2, output_pd, output_ie, \
-        output_img1, output_img2, output_img3, output_img4, output_img5 = \
+        output_t1, output_t2, output_pd, output_ie, output_t2s,\
+        output_img1, output_img2, output_img3, output_img4, output_img5, output_img6, output_img7, output_img8, output_img9 = \
             self(batch.masked_kspace_acq1, batch.masked_kspace_acq2, batch.masked_kspace_acq3, batch.masked_kspace_acq4, batch.masked_kspace_acq5, \
-                batch.mask_acq1, batch.mask_acq2, batch.mask_acq3, batch.mask_acq4, batch.mask_acq5, batch.mask_brain, \
-                # batch.b1, ie, batch.max_value_t1, batch.max_value_t2, batch.max_value_pd, batch.num_low_frequencies) # for dict_v4 IE
-                batch.b1, batch.ie, batch.max_value_t1, batch.max_value_t2, batch.max_value_pd, batch.num_low_frequencies)
+                 batch.masked_kspace_acq6, batch.masked_kspace_acq7, batch.masked_kspace_acq8, batch.masked_kspace_acq9, \
+                batch.mask_acq1, batch.mask_acq2, batch.mask_acq3, batch.mask_acq4, batch.mask_acq5, \
+                batch.mask_acq6, batch.mask_acq7, batch.mask_acq8, batch.mask_acq9, batch.mask_brain, \
+                # batch.b1, ie, batch.max_value_t1, batch.max_value_t2, batch.max_value_pd, batch.max_value_t2s, batch.num_low_frequencies) # for dict_v4 IE
+                batch.b1, batch.ie, batch.max_value_t1, batch.max_value_t2, batch.max_value_pd, batch.max_value_t2s, batch.num_low_frequencies)
 
         # check for FLAIR 203
         if output_t1.shape[-1] < batch.crop_size[1]:
@@ -475,11 +630,13 @@ class QALAS_MAPModule(MriModuleQALAS_MAP):
         output_t2 = transforms_qalas.center_crop(output_t2, crop_size)
         output_pd = transforms_qalas.center_crop(output_pd, crop_size)
         output_ie = transforms_qalas.center_crop(output_ie, crop_size)
+        output_t2s = transforms_qalas.center_crop(output_t2s, crop_size)
 
         output_t1 = output_t1 * batch.mask_brain
         output_t2 = output_t2 * batch.mask_brain
         output_pd = output_pd * batch.mask_brain
         output_ie = output_ie * batch.mask_brain
+        output_t2s = output_t2s * batch.mask_brain
 
         return {
             "fname": batch.fname,
@@ -488,6 +645,7 @@ class QALAS_MAPModule(MriModuleQALAS_MAP):
             "output_t2": output_t2.cpu().numpy(),
             "output_pd": output_pd.cpu().numpy(),
             "output_ie": output_ie.cpu().numpy(),
+            "output_t2s": output_t2s.cpu().numpy(),
         }
 
     def configure_optimizers(self):
