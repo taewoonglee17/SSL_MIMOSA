@@ -57,6 +57,10 @@ def worker_init_fn(worker_id):
                 dataset.transform.mask_func_acq3.rng.seed(seed_i % (2 ** 32 - 1))
                 dataset.transform.mask_func_acq4.rng.seed(seed_i % (2 ** 32 - 1))
                 dataset.transform.mask_func_acq5.rng.seed(seed_i % (2 ** 32 - 1))
+                dataset.transform.mask_func_acq6.rng.seed(seed_i % (2 ** 32 - 1))
+                dataset.transform.mask_func_acq7.rng.seed(seed_i % (2 ** 32 - 1))
+                dataset.transform.mask_func_acq8.rng.seed(seed_i % (2 ** 32 - 1))
+                dataset.transform.mask_func_acq9.rng.seed(seed_i % (2 ** 32 - 1))
     elif data.transform.mask_func_acq1 is not None:
         if is_ddp:  # DDP training: unique seed is determined by worker and device
             seed = base_seed + torch.distributed.get_rank() * worker_info.num_workers
@@ -67,6 +71,10 @@ def worker_init_fn(worker_id):
         data.transform.mask_func_acq3.rng.seed(seed % (2 ** 32 - 1))
         data.transform.mask_func_acq4.rng.seed(seed % (2 ** 32 - 1))
         data.transform.mask_func_acq5.rng.seed(seed % (2 ** 32 - 1))
+        data.transform.mask_func_acq6.rng.seed(seed % (2 ** 32 - 1))
+        data.transform.mask_func_acq7.rng.seed(seed % (2 ** 32 - 1))
+        data.transform.mask_func_acq8.rng.seed(seed % (2 ** 32 - 1))
+        data.transform.mask_func_acq9.rng.seed(seed % (2 ** 32 - 1))
 
 
 class FastMriDataModuleQALAS(pl.LightningDataModule):
