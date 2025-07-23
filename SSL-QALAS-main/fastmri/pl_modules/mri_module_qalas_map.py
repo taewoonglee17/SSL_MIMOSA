@@ -76,37 +76,57 @@ class MriModuleQALAS_MAP(pl.LightningModule):
             "max_value_t1",
             "max_value_t2",
             "max_value_pd",
+            "max_value_t2s",
             "output_t1",
             "output_t2",
             "output_pd",
             "output_ie",
             "output_b1",
+            "output_t2s",
             "output_img1",
             "output_img2",
             "output_img3",
             "output_img4",
             "output_img5",
+            "output_img6",
+            "output_img7",
+            "output_img8",
+            "output_img9",
             "target_t1",
             "target_t2",
             "target_pd",
+            "target_t2s",
             "target_img1",
             "target_img2",
             "target_img3",
             "target_img4",
             "target_img5",
+            "target_img6",
+            "target_img7",
+            "target_img8",
+            "target_img9",
             "val_loss_t1",
             "val_loss_t2",
             "val_loss_pd",
+            "val_loss_t2s",
             "val_loss_img1",
             "val_loss_img2",
             "val_loss_img3",
             "val_loss_img4",
             "val_loss_img5",
+            "val_loss_img6",
+            "val_loss_img7",
+            "val_loss_img8",
+            "val_loss_img9",
             # "val_loss_img1_tv",
             # "val_loss_img2_tv",
             # "val_loss_img3_tv",
             # "val_loss_img4_tv",
             # "val_loss_img5_tv",
+            # "val_loss_img6_tv",
+            # "val_loss_img7_tv",
+            # "val_loss_img8_tv",
+            # "val_loss_img9_tv",
         ):
             if k not in val_logs.keys():
                 raise RuntimeError(
@@ -132,6 +152,10 @@ class MriModuleQALAS_MAP(pl.LightningModule):
             val_logs["output_b1"] = val_logs["output_b1"].unsqueeze(0)
         elif val_logs["output_b1"].ndim != 3:
             raise RuntimeError("Unexpected output_b1 size from validation_step.")
+        if val_logs["output_t2s"].ndim == 2:
+            val_logs["output_t2s"] = val_logs["output_t2s"].unsqueeze(0)
+        elif val_logs["output_t2s"].ndim != 3:
+            raise RuntimeError("Unexpected output_t2s size from validation_step.")
         if val_logs["output_img1"].ndim == 2:
             val_logs["output_img1"] = val_logs["output_img1"].unsqueeze(0)
         elif val_logs["output_img1"].ndim != 3:
@@ -152,6 +176,22 @@ class MriModuleQALAS_MAP(pl.LightningModule):
             val_logs["output_img5"] = val_logs["output_img5"].unsqueeze(0)
         elif val_logs["output_img5"].ndim != 3:
             raise RuntimeError("Unexpected output_img5 size from validation_step.")
+        if val_logs["output_img6"].ndim == 2:
+            val_logs["output_img6"] = val_logs["output_img6"].unsqueeze(0)
+        elif val_logs["output_img6"].ndim != 3:
+            raise RuntimeError("Unexpected output_img6 size from validation_step.")
+        if val_logs["output_img7"].ndim == 2:
+            val_logs["output_img7"] = val_logs["output_img7"].unsqueeze(0)
+        elif val_logs["output_img7"].ndim != 3:
+            raise RuntimeError("Unexpected output_img7 size from validation_step.")
+        if val_logs["output_img8"].ndim == 2:
+            val_logs["output_img8"] = val_logs["output_img8"].unsqueeze(0)
+        elif val_logs["output_img8"].ndim != 3:
+            raise RuntimeError("Unexpected output_img8 size from validation_step.")
+        if val_logs["output_img9"].ndim == 2:
+            val_logs["output_img9"] = val_logs["output_img9"].unsqueeze(0)
+        elif val_logs["output_img9"].ndim != 3:
+            raise RuntimeError("Unexpected output_img9 size from validation_step.")
         if val_logs["target_t1"].ndim == 2:
             val_logs["target_t1"] = val_logs["target_t1"].unsqueeze(0)
         elif val_logs["target_t1"].ndim != 3:
@@ -164,6 +204,10 @@ class MriModuleQALAS_MAP(pl.LightningModule):
             val_logs["target_pd"] = val_logs["target_pd"].unsqueeze(0)
         elif val_logs["target_pd"].ndim != 3:
             raise RuntimeError("Unexpected target_pd size from validation_step.")
+        if val_logs["target_t2s"].ndim == 2:
+            val_logs["target_t2s"] = val_logs["target_t2s"].unsqueeze(0)
+        elif val_logs["target_t2s"].ndim != 3:
+            raise RuntimeError("Unexpected target_t2s size from validation_step.")
         if val_logs["target_img1"].ndim == 2:
             val_logs["target_img1"] = val_logs["target_img1"].unsqueeze(0)
         elif val_logs["target_img1"].ndim != 3:
@@ -184,6 +228,22 @@ class MriModuleQALAS_MAP(pl.LightningModule):
             val_logs["target_img5"] = val_logs["target_img5"].unsqueeze(0)
         elif val_logs["target_img5"].ndim != 3:
             raise RuntimeError("Unexpected target_img5 size from validation_step.")
+        if val_logs["target_img6"].ndim == 2:
+            val_logs["target_img6"] = val_logs["target_img6"].unsqueeze(0)
+        elif val_logs["target_img6"].ndim != 3:
+            raise RuntimeError("Unexpected target_img6 size from validation_step.")
+        if val_logs["target_img7"].ndim == 2:
+            val_logs["target_img7"] = val_logs["target_img7"].unsqueeze(0)
+        elif val_logs["target_img7"].ndim != 3:
+            raise RuntimeError("Unexpected target_img7 size from validation_step.")
+        if val_logs["target_img8"].ndim == 2:
+            val_logs["target_img8"] = val_logs["target_img8"].unsqueeze(0)
+        elif val_logs["target_img8"].ndim != 3:
+            raise RuntimeError("Unexpected target_img8 size from validation_step.")
+        if val_logs["target_img9"].ndim == 2:
+            val_logs["target_img9"] = val_logs["target_img9"].unsqueeze(0)
+        elif val_logs["target_img9"].ndim != 3:
+            raise RuntimeError("Unexpected target_img9 size from validation_step.")
 
         # pick a set of images to log if we don't have one already
         if self.val_log_indices is None:
@@ -204,123 +264,182 @@ class MriModuleQALAS_MAP(pl.LightningModule):
                 target_t1 = val_logs["target_t1"][i].unsqueeze(0)
                 target_t2 = val_logs["target_t2"][i].unsqueeze(0)
                 target_pd = val_logs["target_pd"][i].unsqueeze(0)
+                target_t2s = val_logs["target_t2s"][i].unsqueeze(0)
                 target_img1 = val_logs["target_img1"][i].unsqueeze(0)
                 target_img2 = val_logs["target_img2"][i].unsqueeze(0)
                 target_img3 = val_logs["target_img3"][i].unsqueeze(0)
                 target_img4 = val_logs["target_img4"][i].unsqueeze(0)
                 target_img5 = val_logs["target_img5"][i].unsqueeze(0)
+                target_img6 = val_logs["target_img6"][i].unsqueeze(0)
+                target_img7 = val_logs["target_img7"][i].unsqueeze(0)
+                target_img8 = val_logs["target_img8"][i].unsqueeze(0)
+                target_img9 = val_logs["target_img9"][i].unsqueeze(0)
                 output_t1 = val_logs["output_t1"][i].unsqueeze(0)
                 output_t2 = val_logs["output_t2"][i].unsqueeze(0)
                 output_pd = val_logs["output_pd"][i].unsqueeze(0)
                 output_ie = val_logs["output_ie"][i].unsqueeze(0)
                 output_b1 = val_logs["output_b1"][i].unsqueeze(0)
+                output_t2s = val_logs["output_t2s"][i].unsqueeze(0)
                 output_img1 = val_logs["output_img1"][i].unsqueeze(0)
                 output_img2 = val_logs["output_img2"][i].unsqueeze(0)
                 output_img3 = val_logs["output_img3"][i].unsqueeze(0)
                 output_img4 = val_logs["output_img4"][i].unsqueeze(0)
                 output_img5 = val_logs["output_img5"][i].unsqueeze(0)
+                output_img6 = val_logs["output_img6"][i].unsqueeze(0)
+                output_img7 = val_logs["output_img7"][i].unsqueeze(0)
+                output_img8 = val_logs["output_img8"][i].unsqueeze(0)
+                output_img9 = val_logs["output_img9"][i].unsqueeze(0)
 
-                target_pd = target_pd / target_pd.max()
-                output_pd = output_pd / output_pd.max()
                 error_t1 = torch.abs(target_t1 - output_t1)
                 error_t2 = torch.abs(target_t2 - output_t2)
                 error_pd = torch.abs(target_pd - output_pd)
+                error_t2s = torch.abs(target_t2s - output_t2s)
                 error_img1 = torch.abs(target_img1 - output_img1)
                 error_img2 = torch.abs(target_img2 - output_img2)
                 error_img3 = torch.abs(target_img3 - output_img3)
                 error_img4 = torch.abs(target_img4 - output_img4)
                 error_img5 = torch.abs(target_img5 - output_img5)
+                error_img6 = torch.abs(target_img6 - output_img6)
+                error_img7 = torch.abs(target_img7 - output_img7)
+                error_img8 = torch.abs(target_img8 - output_img8)
+                error_img9 = torch.abs(target_img9 - output_img9)
 
                 output_t1 = output_t1 / output_t1.max()
                 output_t2 = output_t2 / output_t2.max()
                 output_pd = output_pd / output_pd.max()
                 output_ie = output_ie / output_ie.max()
                 output_b1 = output_b1 / output_b1.max()
+                output_t2s = output_t2s / output_t2s.max()
                 output_img1 = output_img1 / output_img1.max()
                 output_img2 = output_img2 / output_img2.max()
                 output_img3 = output_img3 / output_img3.max()
                 output_img4 = output_img4 / output_img4.max()
                 output_img5 = output_img5 / output_img5.max()
+                output_img6 = output_img6 / output_img6.max()
+                output_img7 = output_img7 / output_img7.max()
+                output_img8 = output_img8 / output_img8.max()
+                output_img9 = output_img9 / output_img9.max()
                 target_t1 = target_t1 / target_t1.max()
                 target_t2 = target_t2 / target_t2.max()
                 target_pd = target_pd / target_pd.max()
+                target_t2s = target_t2s / target_t2s.max()
                 target_img1 = target_img1 / target_img1.max()
                 target_img2 = target_img2 / target_img2.max()
                 target_img3 = target_img3 / target_img3.max()
                 target_img4 = target_img4 / target_img4.max()
                 target_img5 = target_img5 / target_img5.max()
+                target_img6 = target_img6 / target_img6.max()
+                target_img7 = target_img7 / target_img7.max()
+                target_img8 = target_img8 / target_img8.max()
+                target_img9 = target_img9 / target_img9.max()
                 error_t1 = error_t1 / error_t1.max()
                 error_t2 = error_t2 / error_t2.max()
                 error_pd = error_pd / error_pd.max()
+                error_t2s = error_t2s / error_t2s.max()
                 error_img1 = error_img1 / error_img1.max()
                 error_img2 = error_img2 / error_img2.max()
                 error_img3 = error_img3 / error_img3.max()
                 error_img4 = error_img4 / error_img4.max()
                 error_img5 = error_img5 / error_img5.max()
+                error_img6 = error_img6 / error_img6.max()
+                error_img7 = error_img7 / error_img7.max()
+                error_img8 = error_img8 / error_img8.max()
+                error_img9 = error_img9 / error_img9.max()
 
-                self.log_image(f"{key}/target", torch.cat((target_t1,target_t2,target_pd),-1))
-                self.log_image(f"{key}/target_forward", torch.cat((target_img1,target_img2,target_img3,target_img4,target_img5),-1))
-                self.log_image(f"{key}/reconstruction", torch.cat((output_t1,output_t2,output_pd,output_ie,output_b1),-1))
-                self.log_image(f"{key}/reconstruction_init_forward", torch.cat((output_img1,output_img2,output_img3,output_img4,output_img5),-1))
-                self.log_image(f"{key}/error", torch.cat((error_t1,error_t2,error_pd),-1))
-                self.log_image(f"{key}/error_init_forward", torch.cat((error_img1,error_img2,error_img3,error_img4,error_img5),-1))
+                self.log_image(f"{key}/target", torch.cat((target_t1,target_t2,target_pd,target_t2s),-1))
+                self.log_image(f"{key}/target_forward", torch.cat((target_img1,target_img2,target_img3,target_img4,target_img5,target_img6,target_img7,target_img8,target_img9),-1))
+                self.log_image(f"{key}/reconstruction", torch.cat((output_t1,output_t2,output_pd,output_ie,output_b1,output_t2s),-1))
+                self.log_image(f"{key}/reconstruction_init_forward", torch.cat((output_img1,output_img2,output_img3,output_img4,output_img5,output_img6,output_img7,output_img8,output_img9),-1))
+                self.log_image(f"{key}/error", torch.cat((error_t1,error_t2,error_pd,error_t2s),-1))
+                self.log_image(f"{key}/error_init_forward", torch.cat((error_img1,error_img2,error_img3,error_img4,error_img5,error_img6,error_img7,error_img8,error_img9),-1))
 
         # compute evaluation metrics
         mse_vals_t1 = defaultdict(dict)
         mse_vals_t2 = defaultdict(dict)
         mse_vals_pd = defaultdict(dict)
+        mse_vals_t2s = defaultdict(dict)
         mse_vals_img1 = defaultdict(dict)
         mse_vals_img2 = defaultdict(dict)
         mse_vals_img3 = defaultdict(dict)
         mse_vals_img4 = defaultdict(dict)
         mse_vals_img5 = defaultdict(dict)
+        mse_vals_img6 = defaultdict(dict)
+        mse_vals_img7 = defaultdict(dict)
+        mse_vals_img8 = defaultdict(dict)
+        mse_vals_img9 = defaultdict(dict)
         target_norms_t1 = defaultdict(dict)
         target_norms_t2 = defaultdict(dict)
         target_norms_pd = defaultdict(dict)
+        target_norms_t2s= defaultdict(dict)
         target_norms_img1 = defaultdict(dict)
         target_norms_img2 = defaultdict(dict)
         target_norms_img3 = defaultdict(dict)
         target_norms_img4 = defaultdict(dict)
         target_norms_img5 = defaultdict(dict)
+        target_norms_img6 = defaultdict(dict)
+        target_norms_img7 = defaultdict(dict)
+        target_norms_img8 = defaultdict(dict)
+        target_norms_img9 = defaultdict(dict)
         ssim_vals_t1 = defaultdict(dict)
         ssim_vals_t2 = defaultdict(dict)
         ssim_vals_pd = defaultdict(dict)
+        ssim_vals_t2s = defaultdict(dict)
         ssim_vals_img1 = defaultdict(dict)
         ssim_vals_img2 = defaultdict(dict)
         ssim_vals_img3 = defaultdict(dict)
         ssim_vals_img4 = defaultdict(dict)
         ssim_vals_img5 = defaultdict(dict)
+        ssim_vals_img6 = defaultdict(dict)
+        ssim_vals_img7 = defaultdict(dict)
+        ssim_vals_img8 = defaultdict(dict)
+        ssim_vals_img9 = defaultdict(dict)
         max_vals_t1 = dict()
         max_vals_t2 = dict()
         max_vals_pd = dict()
+        max_vals_t2s = dict()
         max_vals_img1 = dict()
         max_vals_img2 = dict()
         max_vals_img3 = dict()
         max_vals_img4 = dict()
         max_vals_img5 = dict()
+        max_vals_img6 = dict()
+        max_vals_img7 = dict()
+        max_vals_img8 = dict()
+        max_vals_img9 = dict()
         for i, fname in enumerate(val_logs["fname"]):
             slice_num = int(val_logs["slice_num"][i].cpu())
             maxval_t1 = val_logs["max_value_t1"][i].cpu().numpy()
             maxval_t2 = val_logs["max_value_t2"][i].cpu().numpy()
             maxval_pd = val_logs["max_value_pd"][i].cpu().numpy()
+            maxval_t2s = val_logs["max_value_t2s"][i].cpu().numpy()
             output_t1 = val_logs["output_t1"][i].cpu().numpy()
             output_t2 = val_logs["output_t2"][i].cpu().numpy()
             output_pd = val_logs["output_pd"][i].cpu().numpy()
             output_pd = output_pd / output_pd.max()
+            output_t2s = val_logs["output_t2s"][i].cpu().numpy()
             output_img1 = val_logs["output_img1"][i].cpu().numpy()
             output_img2 = val_logs["output_img2"][i].cpu().numpy()
             output_img3 = val_logs["output_img3"][i].cpu().numpy()
             output_img4 = val_logs["output_img4"][i].cpu().numpy()
             output_img5 = val_logs["output_img5"][i].cpu().numpy()
+            output_img6 = val_logs["output_img6"][i].cpu().numpy()
+            output_img7 = val_logs["output_img7"][i].cpu().numpy()
+            output_img8 = val_logs["output_img8"][i].cpu().numpy()
+            output_img9 = val_logs["output_img9"][i].cpu().numpy()
             target_t1 = val_logs["target_t1"][i].cpu().numpy()
             target_t2 = val_logs["target_t2"][i].cpu().numpy()
             target_pd = val_logs["target_pd"][i].cpu().numpy()
             target_pd = target_pd / target_pd.max()
+            target_t2s = val_logs["target_t2s"][i].cpu().numpy()
             target_img1 = val_logs["target_img1"][i].cpu().numpy()
             target_img2 = val_logs["target_img2"][i].cpu().numpy()
             target_img3 = val_logs["target_img3"][i].cpu().numpy()
             target_img4 = val_logs["target_img4"][i].cpu().numpy()
             target_img5 = val_logs["target_img5"][i].cpu().numpy()
+            target_img6 = val_logs["target_img6"][i].cpu().numpy()
+            target_img7 = val_logs["target_img7"][i].cpu().numpy()
+            target_img8 = val_logs["target_img8"][i].cpu().numpy()
+            target_img9 = val_logs["target_img9"][i].cpu().numpy()
 
             mse_vals_t1[fname][slice_num] = torch.tensor(
                 evaluate.mse(target_t1, output_t1)
@@ -330,6 +449,9 @@ class MriModuleQALAS_MAP(pl.LightningModule):
             ).view(1)
             mse_vals_pd[fname][slice_num] = torch.tensor(
                 evaluate.mse(target_pd, output_pd)
+            ).view(1)
+            mse_vals_t2s[fname][slice_num] = torch.tensor(
+                evaluate.mse(target_t2s, output_t2s)
             ).view(1)
             mse_vals_img1[fname][slice_num] = torch.tensor(
                 evaluate.mse(target_img1, output_img1)
@@ -346,6 +468,18 @@ class MriModuleQALAS_MAP(pl.LightningModule):
             mse_vals_img5[fname][slice_num] = torch.tensor(
                 evaluate.mse(target_img5, output_img5)
             ).view(1)
+            mse_vals_img6[fname][slice_num] = torch.tensor(
+                evaluate.mse(target_img6, output_img6)
+            ).view(1)
+            mse_vals_img7[fname][slice_num] = torch.tensor(
+                evaluate.mse(target_img7, output_img7)
+            ).view(1)
+            mse_vals_img8[fname][slice_num] = torch.tensor(
+                evaluate.mse(target_img8, output_img8)
+            ).view(1)
+            mse_vals_img9[fname][slice_num] = torch.tensor(
+                evaluate.mse(target_img9, output_img9)
+            ).view(1)
             target_norms_t1[fname][slice_num] = torch.tensor(
                 evaluate.mse(target_t1, np.zeros_like(target_t1))
             ).view(1)
@@ -354,6 +488,9 @@ class MriModuleQALAS_MAP(pl.LightningModule):
             ).view(1)
             target_norms_pd[fname][slice_num] = torch.tensor(
                 evaluate.mse(target_pd, np.zeros_like(target_pd))
+            ).view(1)
+            target_norms_t2s[fname][slice_num] = torch.tensor(
+                evaluate.mse(target_t2s, np.zeros_like(target_t2s))
             ).view(1)
             target_norms_img1[fname][slice_num] = torch.tensor(
                 evaluate.mse(target_img1, np.zeros_like(target_img1))
@@ -370,6 +507,18 @@ class MriModuleQALAS_MAP(pl.LightningModule):
             target_norms_img5[fname][slice_num] = torch.tensor(
                 evaluate.mse(target_img5, np.zeros_like(target_img5))
             ).view(1)
+            target_norms_img6[fname][slice_num] = torch.tensor(
+                evaluate.mse(target_img6, np.zeros_like(target_img6))
+            ).view(1)
+            target_norms_img7[fname][slice_num] = torch.tensor(
+                evaluate.mse(target_img7, np.zeros_like(target_img7))
+            ).view(1)
+            target_norms_img8[fname][slice_num] = torch.tensor(
+                evaluate.mse(target_img8, np.zeros_like(target_img8))
+            ).view(1)
+            target_norms_img9[fname][slice_num] = torch.tensor(
+                evaluate.mse(target_img9, np.zeros_like(target_img9))
+            ).view(1)
             ssim_vals_t1[fname][slice_num] = torch.tensor(
                 evaluate.ssim(target_t1[None, ...], output_t1[None, ...], maxval=maxval_t1)
             ).view(1)
@@ -378,6 +527,9 @@ class MriModuleQALAS_MAP(pl.LightningModule):
             ).view(1)
             ssim_vals_pd[fname][slice_num] = torch.tensor(
                 evaluate.ssim(target_pd[None, ...], output_pd[None, ...], maxval=maxval_pd)
+            ).view(1)
+            ssim_vals_t2s[fname][slice_num] = torch.tensor(
+                evaluate.ssim(target_t2s[None, ...], output_t2s[None, ...], maxval=maxval_t2s)
             ).view(1)
             ssim_vals_img1[fname][slice_num] = torch.tensor(
                 evaluate.ssim(target_img1[None, ...], output_img1[None, ...], maxval=target_img1.max())
@@ -394,64 +546,111 @@ class MriModuleQALAS_MAP(pl.LightningModule):
             ssim_vals_img5[fname][slice_num] = torch.tensor(
                 evaluate.ssim(target_img5[None, ...], output_img5[None, ...], maxval=target_img5.max())
             ).view(1)
+            ssim_vals_img6[fname][slice_num] = torch.tensor(
+                evaluate.ssim(target_img6[None, ...], output_img6[None, ...], maxval=target_img6.max())
+            ).view(1)
+            ssim_vals_img7[fname][slice_num] = torch.tensor(
+                evaluate.ssim(target_img7[None, ...], output_img7[None, ...], maxval=target_img7.max())
+            ).view(1)
+            ssim_vals_img8[fname][slice_num] = torch.tensor(
+                evaluate.ssim(target_img8[None, ...], output_img8[None, ...], maxval=target_img8.max())
+            ).view(1)
+            ssim_vals_img9[fname][slice_num] = torch.tensor(
+                evaluate.ssim(target_img9[None, ...], output_img9[None, ...], maxval=target_img9.max())
+            ).view(1)
             max_vals_t1[fname] = maxval_t1
             max_vals_t2[fname] = maxval_t2
             max_vals_pd[fname] = maxval_pd
+            max_vals_t2s[fname] = maxval_t2s
             max_vals_img1[fname] = np.ones_like(maxval_t1)*target_img1.max()
             max_vals_img2[fname] = np.ones_like(maxval_t1)*target_img2.max()
             max_vals_img3[fname] = np.ones_like(maxval_t1)*target_img3.max()
             max_vals_img4[fname] = np.ones_like(maxval_t1)*target_img4.max()
             max_vals_img5[fname] = np.ones_like(maxval_t1)*target_img5.max()
+            max_vals_img6[fname] = np.ones_like(maxval_t1)*target_img6.max()
+            max_vals_img7[fname] = np.ones_like(maxval_t1)*target_img7.max()
+            max_vals_img8[fname] = np.ones_like(maxval_t1)*target_img8.max()
+            max_vals_img9[fname] = np.ones_like(maxval_t1)*target_img9.max()
 
         return {
             "val_loss_t1": val_logs["val_loss_t1"],
             "val_loss_t2": val_logs["val_loss_t2"],
             "val_loss_pd": val_logs["val_loss_pd"],
+            "val_loss_t2s": val_logs["val_loss_t2s"],
             "val_loss_img1": val_logs["val_loss_img1"],
             "val_loss_img2": val_logs["val_loss_img2"],
             "val_loss_img3": val_logs["val_loss_img3"],
             "val_loss_img4": val_logs["val_loss_img4"],
             "val_loss_img5": val_logs["val_loss_img5"],
+            "val_loss_img6": val_logs["val_loss_img6"],
+            "val_loss_img7": val_logs["val_loss_img7"],
+            "val_loss_img8": val_logs["val_loss_img8"],
+            "val_loss_img9": val_logs["val_loss_img9"],
             "mse_vals_t1": dict(mse_vals_t1),
             "mse_vals_t2": dict(mse_vals_t2),
             "mse_vals_pd": dict(mse_vals_pd),
+            "mse_vals_t2s": dict(mse_vals_t2s),
             "mse_vals_img1": dict(mse_vals_img1),
             "mse_vals_img2": dict(mse_vals_img2),
             "mse_vals_img3": dict(mse_vals_img3),
             "mse_vals_img4": dict(mse_vals_img4),
             "mse_vals_img5": dict(mse_vals_img5),
+            "mse_vals_img6": dict(mse_vals_img6),
+            "mse_vals_img7": dict(mse_vals_img7),
+            "mse_vals_img8": dict(mse_vals_img8),
+            "mse_vals_img9": dict(mse_vals_img9),
             "target_norms_t1": dict(target_norms_t1),
             "target_norms_t2": dict(target_norms_t2),
             "target_norms_pd": dict(target_norms_pd),
+            "target_norms_t2s": dict(target_norms_t2s),
             "target_norms_img1": dict(target_norms_img1),
             "target_norms_img2": dict(target_norms_img2),
             "target_norms_img3": dict(target_norms_img3),
             "target_norms_img4": dict(target_norms_img4),
             "target_norms_img5": dict(target_norms_img5),
+            "target_norms_img6": dict(target_norms_img6),
+            "target_norms_img7": dict(target_norms_img7),
+            "target_norms_img8": dict(target_norms_img8),
+            "target_norms_img9": dict(target_norms_img9),
             "ssim_vals_t1": dict(ssim_vals_t1),
             "ssim_vals_t2": dict(ssim_vals_t2),
             "ssim_vals_pd": dict(ssim_vals_pd),
+            "ssim_vals_t2s": dict(ssim_vals_t2s),
             "ssim_vals_img1": dict(ssim_vals_img1),
             "ssim_vals_img2": dict(ssim_vals_img2),
             "ssim_vals_img3": dict(ssim_vals_img3),
             "ssim_vals_img4": dict(ssim_vals_img4),
             "ssim_vals_img5": dict(ssim_vals_img5),
+            "ssim_vals_img6": dict(ssim_vals_img6),
+            "ssim_vals_img7": dict(ssim_vals_img7),
+            "ssim_vals_img8": dict(ssim_vals_img8),
+            "ssim_vals_img9": dict(ssim_vals_img9),
             "max_vals_t1": max_vals_t1,
             "max_vals_t2": max_vals_t2,
             "max_vals_pd": max_vals_pd,
+            "max_vals_t2s": max_vals_t2s,
             "max_vals_img1": max_vals_img1,
             "max_vals_img2": max_vals_img2,
             "max_vals_img3": max_vals_img3,
             "max_vals_img4": max_vals_img4,
             "max_vals_img5": max_vals_img5,
+            "max_vals_img6": max_vals_img6,
+            "max_vals_img7": max_vals_img7,
+            "max_vals_img8": max_vals_img8,
+            "max_vals_img9": max_vals_img9,
             "loss_weight_t1": val_logs["loss_weight_t1"],
             "loss_weight_t2": val_logs["loss_weight_t2"],
             "loss_weight_pd": val_logs["loss_weight_pd"],
+            "loss_weight_t2s": val_logs["loss_weight_t2s"],
             "loss_weight_img1": val_logs["loss_weight_img1"],
             "loss_weight_img2": val_logs["loss_weight_img2"],
             "loss_weight_img3": val_logs["loss_weight_img3"],
             "loss_weight_img4": val_logs["loss_weight_img4"],
             "loss_weight_img5": val_logs["loss_weight_img5"],
+            "loss_weight_img6": val_logs["loss_weight_img6"],
+            "loss_weight_img7": val_logs["loss_weight_img7"],
+            "loss_weight_img8": val_logs["loss_weight_img8"],
+            "loss_weight_img9": val_logs["loss_weight_img9"],
         }
 
     def log_image(self, name, image):
@@ -462,54 +661,84 @@ class MriModuleQALAS_MAP(pl.LightningModule):
         losses_t1 = []
         losses_t2 = []
         losses_pd = []
+        losses_t2s = []
         losses_img1 = []
         losses_img2 = []
         losses_img3 = []
         losses_img4 = []
         losses_img5 = []
+        losses_img6 = []
+        losses_img7 = []
+        losses_img8 = []
+        losses_img9 = []
         mse_vals_t1 = defaultdict(dict)
         mse_vals_t2 = defaultdict(dict)
         mse_vals_pd = defaultdict(dict)
+        mse_vals_t2s = defaultdict(dict)
         mse_vals_img1 = defaultdict(dict)
         mse_vals_img2 = defaultdict(dict)
         mse_vals_img3 = defaultdict(dict)
         mse_vals_img4 = defaultdict(dict)
         mse_vals_img5 = defaultdict(dict)
+        mse_vals_img6 = defaultdict(dict)
+        mse_vals_img7 = defaultdict(dict)
+        mse_vals_img8 = defaultdict(dict)
+        mse_vals_img9 = defaultdict(dict)
         target_norms_t1 = defaultdict(dict)
         target_norms_t2 = defaultdict(dict)
         target_norms_pd = defaultdict(dict)
+        target_norms_t2s = defaultdict(dict)
         target_norms_img1 = defaultdict(dict)
         target_norms_img2 = defaultdict(dict)
         target_norms_img3 = defaultdict(dict)
         target_norms_img4 = defaultdict(dict)
         target_norms_img5 = defaultdict(dict)
+        target_norms_img6 = defaultdict(dict)
+        target_norms_img7 = defaultdict(dict)
+        target_norms_img8 = defaultdict(dict)
+        target_norms_img9 = defaultdict(dict)
         ssim_vals_t1 = defaultdict(dict)
         ssim_vals_t2 = defaultdict(dict)
         ssim_vals_pd = defaultdict(dict)
+        ssim_vals_t2s = defaultdict(dict)
         ssim_vals_img1 = defaultdict(dict)
         ssim_vals_img2 = defaultdict(dict)
         ssim_vals_img3 = defaultdict(dict)
         ssim_vals_img4 = defaultdict(dict)
         ssim_vals_img5 = defaultdict(dict)
+        ssim_vals_img6 = defaultdict(dict)
+        ssim_vals_img7 = defaultdict(dict)
+        ssim_vals_img8 = defaultdict(dict)
+        ssim_vals_img9 = defaultdict(dict)
         max_vals_t1 = dict()
         max_vals_t2 = dict()
         max_vals_pd = dict()
+        max_vals_t2s = dict()
         max_vals_img1 = dict()
         max_vals_img2 = dict()
         max_vals_img3 = dict()
         max_vals_img4 = dict()
         max_vals_img5 = dict()
+        max_vals_img6 = dict()
+        max_vals_img7 = dict()
+        max_vals_img8 = dict()
+        max_vals_img9 = dict()
 
         # use dict updates to handle duplicate slices
         for val_log in val_logs:
             losses_t1.append(val_log["val_loss_t1"].view(-1))
             losses_t2.append(val_log["val_loss_t2"].view(-1))
             losses_pd.append(val_log["val_loss_pd"].view(-1))
+            losses_t2s.append(val_log["val_loss_t2s"].view(-1))
             losses_img1.append(val_log["val_loss_img1"].view(-1))
             losses_img2.append(val_log["val_loss_img2"].view(-1))
             losses_img3.append(val_log["val_loss_img3"].view(-1))
             losses_img4.append(val_log["val_loss_img4"].view(-1))
             losses_img5.append(val_log["val_loss_img5"].view(-1))
+            losses_img6.append(val_log["val_loss_img6"].view(-1))
+            losses_img7.append(val_log["val_loss_img7"].view(-1))
+            losses_img8.append(val_log["val_loss_img8"].view(-1))
+            losses_img9.append(val_log["val_loss_img9"].view(-1))
             
 
             for k in val_log["mse_vals_t1"].keys():
@@ -518,6 +747,8 @@ class MriModuleQALAS_MAP(pl.LightningModule):
                 mse_vals_t2[k].update(val_log["mse_vals_t2"][k])
             for k in val_log["mse_vals_pd"].keys():
                 mse_vals_pd[k].update(val_log["mse_vals_pd"][k])
+            for k in val_log["mse_vals_t2s"].keys():
+                mse_vals_t2s[k].update(val_log["mse_vals_t2s"][k])    
             for k in val_log["mse_vals_img1"].keys():
                 mse_vals_img1[k].update(val_log["mse_vals_img1"][k])
             for k in val_log["mse_vals_img2"].keys():
@@ -528,12 +759,22 @@ class MriModuleQALAS_MAP(pl.LightningModule):
                 mse_vals_img4[k].update(val_log["mse_vals_img4"][k])
             for k in val_log["mse_vals_img5"].keys():
                 mse_vals_img5[k].update(val_log["mse_vals_img5"][k])
+            for k in val_log["mse_vals_img6"].keys():
+                mse_vals_img6[k].update(val_log["mse_vals_img6"][k])
+            for k in val_log["mse_vals_img7"].keys():
+                mse_vals_img7[k].update(val_log["mse_vals_img7"][k])
+            for k in val_log["mse_vals_img8"].keys():
+                mse_vals_img8[k].update(val_log["mse_vals_img8"][k])
+            for k in val_log["mse_vals_img9"].keys():
+                mse_vals_img9[k].update(val_log["mse_vals_img9"][k])
             for k in val_log["target_norms_t1"].keys():
                 target_norms_t1[k].update(val_log["target_norms_t1"][k])
             for k in val_log["target_norms_t2"].keys():
                 target_norms_t2[k].update(val_log["target_norms_t2"][k])
             for k in val_log["target_norms_pd"].keys():
                 target_norms_pd[k].update(val_log["target_norms_pd"][k])
+            for k in val_log["target_norms_t2s"].keys():
+                target_norms_t2s[k].update(val_log["target_norms_t2s"][k])
             for k in val_log["target_norms_img1"].keys():
                 target_norms_img1[k].update(val_log["target_norms_img1"][k])
             for k in val_log["target_norms_img2"].keys():
@@ -544,12 +785,22 @@ class MriModuleQALAS_MAP(pl.LightningModule):
                 target_norms_img4[k].update(val_log["target_norms_img4"][k])
             for k in val_log["target_norms_img5"].keys():
                 target_norms_img5[k].update(val_log["target_norms_img5"][k])
+            for k in val_log["target_norms_img6"].keys():
+                target_norms_img6[k].update(val_log["target_norms_img6"][k])
+            for k in val_log["target_norms_img7"].keys():
+                target_norms_img7[k].update(val_log["target_norms_img7"][k])
+            for k in val_log["target_norms_img8"].keys():
+                target_norms_img8[k].update(val_log["target_norms_img8"][k])
+            for k in val_log["target_norms_img9"].keys():
+                target_norms_img9[k].update(val_log["target_norms_img9"][k])
             for k in val_log["ssim_vals_t1"].keys():
                 ssim_vals_t1[k].update(val_log["ssim_vals_t1"][k])
             for k in val_log["ssim_vals_t2"].keys():
                 ssim_vals_t2[k].update(val_log["ssim_vals_t2"][k])
             for k in val_log["ssim_vals_pd"].keys():
                 ssim_vals_pd[k].update(val_log["ssim_vals_pd"][k])
+            for k in val_log["ssim_vals_t2s"].keys():
+                ssim_vals_t2s[k].update(val_log["ssim_vals_t2s"][k])
             for k in val_log["ssim_vals_img1"].keys():
                 ssim_vals_img1[k].update(val_log["ssim_vals_img1"][k])
             for k in val_log["ssim_vals_img2"].keys():
@@ -560,12 +811,22 @@ class MriModuleQALAS_MAP(pl.LightningModule):
                 ssim_vals_img4[k].update(val_log["ssim_vals_img4"][k])
             for k in val_log["ssim_vals_img5"].keys():
                 ssim_vals_img5[k].update(val_log["ssim_vals_img5"][k])
+            for k in val_log["ssim_vals_img6"].keys():
+                ssim_vals_img6[k].update(val_log["ssim_vals_img6"][k])
+            for k in val_log["ssim_vals_img7"].keys():
+                ssim_vals_img7[k].update(val_log["ssim_vals_img7"][k])
+            for k in val_log["ssim_vals_img8"].keys():
+                ssim_vals_img8[k].update(val_log["ssim_vals_img8"][k])
+            for k in val_log["ssim_vals_img9"].keys():
+                ssim_vals_img9[k].update(val_log["ssim_vals_img9"][k])
             for k in val_log["max_vals_t1"]:
                 max_vals_t1[k] = val_log["max_vals_t1"][k]
             for k in val_log["max_vals_t2"]:
                 max_vals_t2[k] = val_log["max_vals_t2"][k]
             for k in val_log["max_vals_pd"]:
                 max_vals_pd[k] = val_log["max_vals_pd"][k]
+            for k in val_log["max_vals_t2s"]:
+                max_vals_t2s[k] = val_log["max_vals_t2s"][k]
             for k in val_log["max_vals_img1"]:
                 max_vals_img1[k] = val_log["max_vals_img1"][k]
             for k in val_log["max_vals_img2"]:
@@ -576,50 +837,78 @@ class MriModuleQALAS_MAP(pl.LightningModule):
                 max_vals_img4[k] = val_log["max_vals_img4"][k]
             for k in val_log["max_vals_img5"]:
                 max_vals_img5[k] = val_log["max_vals_img5"][k]
+            for k in val_log["max_vals_img6"]:
+                max_vals_img6[k] = val_log["max_vals_img6"][k]
+            for k in val_log["max_vals_img7"]:
+                max_vals_img7[k] = val_log["max_vals_img7"][k]
+            for k in val_log["max_vals_img8"]:
+                max_vals_img8[k] = val_log["max_vals_img8"][k]
+            for k in val_log["max_vals_img9"]:
+                max_vals_img9[k] = val_log["max_vals_img9"][k]
 
         # check to make sure we have all files in all metrics
         assert (
             mse_vals_t1.keys()
             == mse_vals_t2.keys()
             == mse_vals_pd.keys()
+            == mse_vals_t2s.keys()
             == mse_vals_img1.keys()
             == mse_vals_img2.keys()
             == mse_vals_img3.keys()
             == mse_vals_img4.keys()
             == mse_vals_img5.keys()
+            == mse_vals_img6.keys()
+            == mse_vals_img7.keys()
+            == mse_vals_img8.keys()
+            == mse_vals_img9.keys()
             == target_norms_t1.keys()
             == target_norms_t2.keys()
             == target_norms_pd.keys()
+             == target_norms_t2s.keys()
             == target_norms_img1.keys()
             == target_norms_img2.keys()
             == target_norms_img3.keys()
             == target_norms_img4.keys()
             == target_norms_img5.keys()
+            == target_norms_img6.keys()
+            == target_norms_img7.keys()
+            == target_norms_img8.keys()
+            == target_norms_img9.keys()
             == ssim_vals_t1.keys()
             == ssim_vals_t2.keys()
             == ssim_vals_pd.keys()
+            == ssim_vals_t2s.keys()
             == ssim_vals_img1.keys()
             == ssim_vals_img2.keys()
             == ssim_vals_img3.keys()
             == ssim_vals_img4.keys()
             == ssim_vals_img5.keys()
+            == ssim_vals_img6.keys()
+            == ssim_vals_img7.keys()
+            == ssim_vals_img8.keys()
+            == ssim_vals_img9.keys()
             == max_vals_t1.keys()
             == max_vals_t2.keys()
             == max_vals_pd.keys()
+            == max_vals_t2s.keys()
             == max_vals_img1.keys()
             == max_vals_img2.keys()
             == max_vals_img3.keys()
             == max_vals_img4.keys()
             == max_vals_img5.keys()
+            == max_vals_img6.keys()
+            == max_vals_img7.keys()
+            == max_vals_img8.keys()
+            == max_vals_img9.keys()
         )
 
         # apply means across image volumes
-        metrics = {"nmse_t1": 0, "nmse_t2": 0, "nmse_pd": 0, \
-                    "nmse_img1": 0, "nmse_img2": 0, "nmse_img3": 0, "nmse_img4": 0, "nmse_img5": 0, \
-                    "ssim_t1": 0, "ssim_t2": 0, "ssim_pd": 0, \
-                    "ssim_img1": 0, "ssim_img2": 0, "ssim_img3": 0, "ssim_img4": 0, "ssim_img5": 0, \
-                    "psnr_t1": 0, "psnr_t2": 0, "psnr_pd": 0, \
-                    "psnr_img1": 0, "psnr_img2": 0, "psnr_img3": 0, "psnr_img4": 0, "psnr_img5": 0}
+        metrics = {"nmse_t1": 0, "nmse_t2": 0, "nmse_pd": 0, "nmse_t2s": 0,\
+                    "nmse_img1": 0, "nmse_img2": 0, "nmse_img3": 0, "nmse_img4": 0, "nmse_img5": 0, "nmse_img6": 0, "nmse_img7": 0, "nmse_img8": 0, "nmse_img9": 0,\
+                    "ssim_t1": 0, "ssim_t2": 0, "ssim_pd": 0, "ssim_t2s": 0,\
+                    "ssim_img1": 0, "ssim_img2": 0, "ssim_img3": 0, "ssim_img4": 0, "ssim_img5": 0, "ssim_img6": 0, "ssim_img7": 0, "ssim_img8": 0, "ssim_img9": 0, \
+                    "psnr_t1": 0, "psnr_t2": 0, "psnr_pd": 0, "psnr_t2s": 0,\
+                    "psnr_img1": 0, "psnr_img2": 0, "psnr_img3": 0, "psnr_img4": 0, "psnr_img5": 0, "psnr_img6": 0, "psnr_img7": 0, "psnr_img8": 0, "psnr_img9": 0}
         local_examples = 0
         for fname in mse_vals_t1.keys():
             local_examples = local_examples + 1
@@ -631,6 +920,9 @@ class MriModuleQALAS_MAP(pl.LightningModule):
             )
             mse_val_pd = torch.mean(
                 torch.cat([v.view(-1) for _, v in mse_vals_pd[fname].items()])
+            )
+            mse_val_t2s = torch.mean(
+                torch.cat([v.view(-1) for _, v in mse_vals_t2s[fname].items()])
             )
             mse_val_img1 = torch.mean(
                 torch.cat([v.view(-1) for _, v in mse_vals_img1[fname].items()])
@@ -647,6 +939,18 @@ class MriModuleQALAS_MAP(pl.LightningModule):
             mse_val_img5 = torch.mean(
                 torch.cat([v.view(-1) for _, v in mse_vals_img5[fname].items()])
             )
+            mse_val_img6 = torch.mean(
+                torch.cat([v.view(-1) for _, v in mse_vals_img6[fname].items()])
+            )
+            mse_val_img7 = torch.mean(
+                torch.cat([v.view(-1) for _, v in mse_vals_img7[fname].items()])
+            )
+            mse_val_img8 = torch.mean(
+                torch.cat([v.view(-1) for _, v in mse_vals_img8[fname].items()])
+            )
+            mse_val_img9 = torch.mean(
+                torch.cat([v.view(-1) for _, v in mse_vals_img9[fname].items()])
+            )
             target_norm_t1 = torch.mean(
                 torch.cat([v.view(-1) for _, v in target_norms_t1[fname].items()])
             )
@@ -655,6 +959,9 @@ class MriModuleQALAS_MAP(pl.LightningModule):
             )
             target_norm_pd = torch.mean(
                 torch.cat([v.view(-1) for _, v in target_norms_pd[fname].items()])
+            )
+            target_norm_t2s = torch.mean(
+                torch.cat([v.view(-1) for _, v in target_norms_t2s[fname].items()])
             )
             target_norm_img1 = torch.mean(
                 torch.cat([v.view(-1) for _, v in target_norms_img1[fname].items()])
@@ -671,14 +978,31 @@ class MriModuleQALAS_MAP(pl.LightningModule):
             target_norm_img5 = torch.mean(
                 torch.cat([v.view(-1) for _, v in target_norms_img5[fname].items()])
             )
+            target_norm_img6 = torch.mean(
+                torch.cat([v.view(-1) for _, v in target_norms_img6[fname].items()])
+            )
+            target_norm_img7 = torch.mean(
+                torch.cat([v.view(-1) for _, v in target_norms_img7[fname].items()])
+            )
+            target_norm_img8 = torch.mean(
+                torch.cat([v.view(-1) for _, v in target_norms_img8[fname].items()])
+            )
+            target_norm_img9 = torch.mean(
+                torch.cat([v.view(-1) for _, v in target_norms_img9[fname].items()])
+            )
             metrics["nmse_t1"] = metrics["nmse_t1"] + mse_val_t1 / target_norm_t1
             metrics["nmse_t2"] = metrics["nmse_t2"] + mse_val_t2 / target_norm_t2
             metrics["nmse_pd"] = metrics["nmse_pd"] + mse_val_pd / target_norm_pd
+            metrics["nmse_t2s"] = metrics["nmse_t2s"] + mse_val_t2s / target_norm_t2s
             metrics["nmse_img1"] = metrics["nmse_img1"] + mse_val_img1 / target_norm_img1
             metrics["nmse_img2"] = metrics["nmse_img2"] + mse_val_img2 / target_norm_img2
             metrics["nmse_img3"] = metrics["nmse_img3"] + mse_val_img3 / target_norm_img3
             metrics["nmse_img4"] = metrics["nmse_img4"] + mse_val_img4 / target_norm_img4
             metrics["nmse_img5"] = metrics["nmse_img5"] + mse_val_img5 / target_norm_img5
+            metrics["nmse_img6"] = metrics["nmse_img6"] + mse_val_img6 / target_norm_img6
+            metrics["nmse_img7"] = metrics["nmse_img7"] + mse_val_img7 / target_norm_img7
+            metrics["nmse_img8"] = metrics["nmse_img8"] + mse_val_img8 / target_norm_img8
+            metrics["nmse_img9"] = metrics["nmse_img9"] + mse_val_img9 / target_norm_img9
             metrics["psnr_t1"] = (
                 metrics["psnr_t1"]
                 + 20
@@ -708,6 +1032,16 @@ class MriModuleQALAS_MAP(pl.LightningModule):
                     )[0]
                 )
                 - 10 * torch.log10(mse_val_pd)
+            )
+            metrics["psnr_t2s"] = (
+                metrics["psnr_t2s"]
+                + 20
+                * torch.log10(
+                    torch.tensor(
+                        max_vals_t2s[fname], dtype=mse_val_t2s.dtype, device=mse_val_t2s.device
+                    )[0]
+                )
+                - 10 * torch.log10(mse_val_t2s)
             )
             metrics["psnr_img1"] = (
                 metrics["psnr_img1"]
@@ -759,6 +1093,46 @@ class MriModuleQALAS_MAP(pl.LightningModule):
                 )
                 - 10 * torch.log10(mse_val_img5)
             )
+            metrics["psnr_img6"] = (
+                metrics["psnr_img6"]
+                + 20
+                * torch.log10(
+                    torch.tensor(
+                        max_vals_img6[fname], dtype=mse_val_img6.dtype, device=mse_val_img6.device
+                    )[0]
+                )
+                - 10 * torch.log10(mse_val_img6)
+            )
+            metrics["psnr_img7"] = (
+                metrics["psnr_img7"]
+                + 20
+                * torch.log10(
+                    torch.tensor(
+                        max_vals_img7[fname], dtype=mse_val_img7.dtype, device=mse_val_img7.device
+                    )[0]
+                )
+                - 10 * torch.log10(mse_val_img7)
+            )
+            metrics["psnr_img8"] = (
+                metrics["psnr_img8"]
+                + 20
+                * torch.log10(
+                    torch.tensor(
+                        max_vals_img8[fname], dtype=mse_val_img8.dtype, device=mse_val_img8.device
+                    )[0]
+                )
+                - 10 * torch.log10(mse_val_img8)
+            )
+            metrics["psnr_img9"] = (
+                metrics["psnr_img9"]
+                + 20
+                * torch.log10(
+                    torch.tensor(
+                        max_vals_img9[fname], dtype=mse_val_img9.dtype, device=mse_val_img9.device
+                    )[0]
+                )
+                - 10 * torch.log10(mse_val_img9)
+            )
             metrics["ssim_t1"] = metrics["ssim_t1"] + torch.mean(
                 torch.cat([v.view(-1) for _, v in ssim_vals_t1[fname].items()])
             )
@@ -767,6 +1141,9 @@ class MriModuleQALAS_MAP(pl.LightningModule):
             )
             metrics["ssim_pd"] = metrics["ssim_pd"] + torch.mean(
                 torch.cat([v.view(-1) for _, v in ssim_vals_pd[fname].items()])
+            )
+            metrics["ssim_t2s"] = metrics["ssim_t2s"] + torch.mean(
+                torch.cat([v.view(-1) for _, v in ssim_vals_t2s[fname].items()])
             )
             metrics["ssim_img1"] = metrics["ssim_img1"] + torch.mean(
                 torch.cat([v.view(-1) for _, v in ssim_vals_img1[fname].items()])
@@ -783,41 +1160,71 @@ class MriModuleQALAS_MAP(pl.LightningModule):
             metrics["ssim_img5"] = metrics["ssim_img5"] + torch.mean(
                 torch.cat([v.view(-1) for _, v in ssim_vals_img5[fname].items()])
             )
+            metrics["ssim_img6"] = metrics["ssim_img6"] + torch.mean(
+                torch.cat([v.view(-1) for _, v in ssim_vals_img6[fname].items()])
+            )
+            metrics["ssim_img7"] = metrics["ssim_img7"] + torch.mean(
+                torch.cat([v.view(-1) for _, v in ssim_vals_img7[fname].items()])
+            )
+            metrics["ssim_img8"] = metrics["ssim_img8"] + torch.mean(
+                torch.cat([v.view(-1) for _, v in ssim_vals_img8[fname].items()])
+            )
+            metrics["ssim_img9"] = metrics["ssim_img9"] + torch.mean(
+                torch.cat([v.view(-1) for _, v in ssim_vals_img9[fname].items()])
+            )
 
         # reduce across ddp via sum
         metrics["nmse_t1"] = self.NMSE(metrics["nmse_t1"])
         metrics["nmse_t2"] = self.NMSE(metrics["nmse_t2"])
         metrics["nmse_pd"] = self.NMSE(metrics["nmse_pd"])
+        metrics["nmse_t2s"] = self.NMSE(metrics["nmse_t2s"])
         metrics["nmse_img1"] = self.NMSE(metrics["nmse_img1"])
         metrics["nmse_img2"] = self.NMSE(metrics["nmse_img2"])
         metrics["nmse_img3"] = self.NMSE(metrics["nmse_img3"])
         metrics["nmse_img4"] = self.NMSE(metrics["nmse_img4"])
         metrics["nmse_img5"] = self.NMSE(metrics["nmse_img5"])
+        metrics["nmse_img6"] = self.NMSE(metrics["nmse_img6"])
+        metrics["nmse_img7"] = self.NMSE(metrics["nmse_img7"])
+        metrics["nmse_img8"] = self.NMSE(metrics["nmse_img8"])
+        metrics["nmse_img9"] = self.NMSE(metrics["nmse_img9"])
         metrics["ssim_t1"] = self.SSIM(metrics["ssim_t1"])
         metrics["ssim_t2"] = self.SSIM(metrics["ssim_t2"])
         metrics["ssim_pd"] = self.SSIM(metrics["ssim_pd"])
+        metrics["ssim_t2s"] = self.SSIM(metrics["ssim_t2s"])
         metrics["ssim_img1"] = self.SSIM(metrics["ssim_img1"])
         metrics["ssim_img2"] = self.SSIM(metrics["ssim_img2"])
         metrics["ssim_img3"] = self.SSIM(metrics["ssim_img3"])
         metrics["ssim_img4"] = self.SSIM(metrics["ssim_img4"])
         metrics["ssim_img5"] = self.SSIM(metrics["ssim_img5"])
+        metrics["ssim_img6"] = self.SSIM(metrics["ssim_img6"])
+        metrics["ssim_img7"] = self.SSIM(metrics["ssim_img7"])
+        metrics["ssim_img8"] = self.SSIM(metrics["ssim_img8"])
+        metrics["ssim_img9"] = self.SSIM(metrics["ssim_img9"])
         metrics["psnr_t1"] = self.PSNR(metrics["psnr_t1"])
         metrics["psnr_t2"] = self.PSNR(metrics["psnr_t2"])
         metrics["psnr_pd"] = self.PSNR(metrics["psnr_pd"])
+        metrics["psnr_t2s"] = self.PSNR(metrics["psnr_t2s"])
         metrics["psnr_img1"] = self.PSNR(metrics["psnr_img1"])
         metrics["psnr_img2"] = self.PSNR(metrics["psnr_img2"])
         metrics["psnr_img3"] = self.PSNR(metrics["psnr_img3"])
         metrics["psnr_img4"] = self.PSNR(metrics["psnr_img4"])
         metrics["psnr_img5"] = self.PSNR(metrics["psnr_img5"])
+        metrics["psnr_img6"] = self.PSNR(metrics["psnr_img6"])
+        metrics["psnr_img7"] = self.PSNR(metrics["psnr_img7"])
+        metrics["psnr_img8"] = self.PSNR(metrics["psnr_img8"])
+        metrics["psnr_img9"] = self.PSNR(metrics["psnr_img9"])
 
         tot_examples = self.TotExamples(torch.tensor(local_examples))
         val_loss = self.ValLoss((torch.sum(torch.cat(losses_t1)) * val_log["loss_weight_t1"] + torch.sum(torch.cat(losses_t2)) * val_log["loss_weight_t2"] + \
-                                    torch.sum(torch.cat(losses_pd)) * val_log["loss_weight_pd"] + \
+                                    torch.sum(torch.cat(losses_pd)) * val_log["loss_weight_pd"] + torch.sum(torch.cat(losses_t2s)) * val_log["loss_weight_t2s"] + \
                                     torch.sum(torch.cat(losses_img1)) * val_log["loss_weight_img1"] + torch.sum(torch.cat(losses_img2)) * val_log["loss_weight_img2"] + \
                                     torch.sum(torch.cat(losses_img3)) * val_log["loss_weight_img3"] + torch.sum(torch.cat(losses_img4)) * val_log["loss_weight_img4"] + \
-                                    torch.sum(torch.cat(losses_img5)) * val_log["loss_weight_img5"]) \
-                                / (val_log["loss_weight_t1"] + val_log["loss_weight_t2"] + val_log["loss_weight_pd"] + \
-                                    val_log["loss_weight_img1"] + val_log["loss_weight_img2"] + val_log["loss_weight_img3"] + val_log["loss_weight_img4"] + val_log["loss_weight_img5"]))
+                                    torch.sum(torch.cat(losses_img5)) * val_log["loss_weight_img5"] + torch.sum(torch.cat(losses_img6)) * val_log["loss_weight_img6"] + \
+                                    torch.sum(torch.cat(losses_img7)) * val_log["loss_weight_img7"] + torch.sum(torch.cat(losses_img8)) * val_log["loss_weight_img8"] + \
+                                    torch.sum(torch.cat(losses_img9)) * val_log["loss_weight_img9"]) \
+                                / (val_log["loss_weight_t1"] + val_log["loss_weight_t2"] + val_log["loss_weight_pd"] + val_log["loss_weight_t2s"] + \
+                                    val_log["loss_weight_img1"] + val_log["loss_weight_img2"] + val_log["loss_weight_img3"] + val_log["loss_weight_img4"] + val_log["loss_weight_img5"] + \
+                                    val_log["loss_weight_img6"] + val_log["loss_weight_img7"] + val_log["loss_weight_img8"] + val_log["loss_weight_img9"]))
         tot_slice_examples = self.TotSliceExamples(
             torch.tensor(len(losses_t1), dtype=torch.float)
         )
@@ -832,6 +1239,7 @@ class MriModuleQALAS_MAP(pl.LightningModule):
         outputs_pd = defaultdict(dict)
         outputs_ie = defaultdict(dict)
         outputs_b1 = defaultdict(dict)
+        outputs_t2s = defaultdict(dict)
 
         # use dicts for aggregation to handle duplicate slices in ddp mode
         for log in test_logs:
@@ -841,6 +1249,7 @@ class MriModuleQALAS_MAP(pl.LightningModule):
                 outputs_pd[fname][int(slice_num.cpu())] = log["output_pd"][i]
                 outputs_ie[fname][int(slice_num.cpu())] = log["output_ie"][i]
                 outputs_b1[fname][int(slice_num.cpu())] = log["output_b1"][i]
+                outputs_t2s[fname][int(slice_num.cpu())] = log["output_t2s"][i]
 
         # stack all the slices for each file
         for fname in outputs_t1:
@@ -859,6 +1268,9 @@ class MriModuleQALAS_MAP(pl.LightningModule):
             outputs_b1[fname] = np.stack(
                 [out for _, out in sorted(outputs_b1[fname].items())]
             )
+            outputs_t2s[fname] = np.stack(
+                [out for _, out in sorted(outputs_t2s[fname].items())]
+            )
 
         # pull the default_root_dir if we have a trainer, otherwise save to cwd
         if hasattr(self, "trainer"):
@@ -867,7 +1279,7 @@ class MriModuleQALAS_MAP(pl.LightningModule):
             save_path = pathlib.Path.cwd() / "reconstructions"
         self.print(f"Saving reconstructions to {save_path}")
 
-        fastmri.save_reconstructions_qalas(outputs_t1, outputs_t2, outputs_pd, outputs_ie, outputs_b1, save_path)
+        fastmri.save_reconstructions_qalas(outputs_t1, outputs_t2, outputs_pd, outputs_ie, outputs_b1, outputs_t2s, save_path)
 
     @staticmethod
     def add_model_specific_args(parent_parser):  # pragma: no-cover
