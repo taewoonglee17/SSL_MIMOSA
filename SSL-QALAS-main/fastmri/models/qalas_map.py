@@ -264,7 +264,7 @@ class QALAS_MAP(nn.Module):
         image_pred_acq9 = masked_kspace_acq9
 
         # Using CNN for Mapping
-        map_pred = self.maps_net(torch.cat((image_pred_acq1, image_pred_acq2, image_pred_acq3, image_pred_acq4, image_pred_acq5,
+        map_pred = self.maps_net(torch.cat((image_pred_acq1, image_pred_acq2, image_pred_acq3, image_pred_acq4, image_pred_acq5, \
                                             image_pred_acq6, image_pred_acq7, image_pred_acq8, image_pred_acq9), 1))
         # map_pred = (map_pred + 1) / 2
         # map_pred = self.maps_net(torch.cat((image_pred_acq1, image_pred_acq2, image_pred_acq3, image_pred_acq4, image_pred_acq5,

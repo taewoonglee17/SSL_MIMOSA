@@ -131,6 +131,7 @@ class QALAS_MAPModule(MriModuleQALAS_MAP):
         output_t1, output_t2, output_pd, output_ie, output_b1, output_t2s, \
         output_img1, output_img2, output_img3, output_img4, output_img5, output_img6, output_img7, output_img8, output_img9 = \
             self(batch.masked_kspace_acq1, batch.masked_kspace_acq2, batch.masked_kspace_acq3, batch.masked_kspace_acq4, batch.masked_kspace_acq5, \
+                 batch.masked_kspace_acq6, batch.masked_kspace_acq7, batch.masked_kspace_acq8, batch.masked_kspace_acq9, \
                 batch.mask_acq1, batch.mask_acq2, batch.mask_acq3, batch.mask_acq4, batch.mask_acq5, batch.mask_acq6, batch.mask_acq7, batch.mask_acq8, batch.mask_acq9, batch.mask_brain, \
                 # batch.b1, ie, batch.max_value_t1, batch.max_value_t2, batch.max_value_pd, batch.max_value_t2s, batch.num_low_frequencies) # for dict_v4 IE
                 batch.b1, batch.ie, batch.max_value_t1, batch.max_value_t2, batch.max_value_pd, batch.max_value_t2s, batch.num_low_frequencies)

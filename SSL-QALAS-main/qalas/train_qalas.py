@@ -99,7 +99,7 @@ def build_args():
 
     # set defaults based on optional directory config
     data_path = fetch_dir("brain_path", path_config)
-    default_root_dir = fetch_dir("log_path", path_config) / "qalas_log"
+    default_root_dir = fetch_dir("log_path", path_config) / "mimosa_log" # qalas_log
 
     # client arguments
     parser.add_argument(

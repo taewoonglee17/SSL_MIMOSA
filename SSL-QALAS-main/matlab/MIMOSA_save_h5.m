@@ -7,8 +7,8 @@ addpath(genpath('utils'));
 
 %%
 
-savepath = '/autofs/space/marduk_001/users/tommy/20250505_mimosa_invivo/';
-savename = 'miomsa_test.h5';
+savepath = '/autofs/space/marduk_001/users/tommy/mimosa_data/multicoil_train/';
+savename = 'mimosa_train.h5';
 
 compare_ref_map     = 1;
 load_b1_map         = 1;
@@ -31,6 +31,15 @@ if load_b1_map == 1
     B1_map(B1_map>1.35) = 1.35;
     B1_map(B1_map<0.65) = 0.65;
 end
+
+% Make them real valued
+input_img = abs(input_img);
+T1_map  = abs(T1_map);
+T2_map  = abs(T2_map);
+T2s_map = abs(T2s_map);
+PD_map  = abs(PD_map);
+IE_map  = abs(IE_map);
+img_b1 = abs(img_b1);
 
 toc
 
@@ -155,7 +164,10 @@ for i = 1:Nacq
     data_to_save.(field_name) = kspace_acq{i};
 end
 
+% If complex-valued:
 saveh5(data_to_save, file_name, 'ComplexFormat', {'r','i'}, 'RootName', '/');
+% If real-valued:
+saveh5(data_to_save, file_name, 'RootName', '/');
 
 h5create(file_name,'/reconstruction_t1',[Ny,Nx,Nz],'Datatype','single');
 h5write(file_name, '/reconstruction_t1', T1_map);

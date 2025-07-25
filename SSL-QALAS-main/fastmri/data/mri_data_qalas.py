@@ -387,7 +387,7 @@ class SliceDatasetQALAS(torch.utils.data.Dataset):
                     attrs, fname.name, dataslice)
         else:
             sample = self.transform(kspace_acq1, kspace_acq2, kspace_acq3, kspace_acq4, kspace_acq5, kspace_acq6, kspace_acq7, kspace_acq8, kspace_acq9,\
-                                    mask_acq1, mask_acq2, mask_acq3, mask_acq4, mask_acq5, mask_acq5, mask_acq6, mask_acq7, mask_acq8, mask_acq9, mask_brain, \
+                                    mask_acq1, mask_acq2, mask_acq3, mask_acq4, mask_acq5, mask_acq6, mask_acq7, mask_acq8, mask_acq9, mask_brain, \
                                     # coil_sens, \
                                     b1, ie, target_t1, target_t2, target_pd, target_t2s,\
                                     attrs, fname.name, dataslice)
