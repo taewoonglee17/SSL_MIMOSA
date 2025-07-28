@@ -32,8 +32,8 @@ class NormUnet(nn.Module):
         self,
         chans: int,
         num_pools: int,
-        in_chans: int = 5,
-        out_chans: int = 4,
+        in_chans: int = 9,
+        out_chans: int = 5,
         drop_prob: float = 0.0,
     ):
         """
@@ -236,7 +236,6 @@ class QALAS_MAP(nn.Module):
         max_value_t1: torch.Tensor,
         max_value_t2: torch.Tensor,
         max_value_pd: torch.Tensor,
-        max_value_ie: torch.Tensor,
         max_value_t2s: torch.Tensor,
         num_low_frequencies: Optional[int] = None,
     ) -> torch.Tensor:
@@ -308,7 +307,7 @@ class QALASBlock(nn.Module):
         """
         super().__init__()
 
-    def qalas_forward_eq(self, x_t1: torch.Tensor, x_t2: torch.Tensor, x_m0: torch.Tensor, x_ie: torch.Tensor, x_b1: torch.Tensor) -> torch.Tensor:
+    def qalas_forward_eq(self, x_t1: torch.Tensor, x_t2: torch.Tensor, x_m0: torch.Tensor, x_ie: torch.Tensor, x_b1: torch.Tensor, x_t2s: torch.Tensor) -> torch.Tensor:
         flip_ang = torch.Tensor([4]).to(x_t1.device) * x_b1.to(x_t1.device)     # Refocusing flip angle
         tf = torch.Tensor([110]).to(x_t1.device)                                # Turbo Factor
         esp = torch.Tensor([0.0067]).to(x_t1.device)                            # ESP
@@ -394,7 +393,14 @@ class QALASBlock(nn.Module):
             m_current = x_m0_star * (1 - Eetl) + m_current * Eetl                                       # M13 (del_t = 0.7296)
             m_current = x_m0 * (1 - Ed14) + m_current * Ed14                                            # M14
 
-        return torch.abs(current_img_acq1), torch.abs(current_img_acq2), torch.abs(current_img_acq3), torch.abs(current_img_acq4), torch.abs(current_img_acq5) # org
+            current_img_acq6 = m_current * torch.sin(np.pi / 180 * flip_ang)     
+            current_img_acq7 = m_current * torch.sin(np.pi / 180 * flip_ang)     
+            current_img_acq8 = m_current * torch.sin(np.pi / 180 * flip_ang)     
+            current_img_acq9 = m_current * torch.sin(np.pi / 180 * flip_ang)     
+
+
+        return torch.abs(current_img_acq1), torch.abs(current_img_acq2), torch.abs(current_img_acq3), torch.abs(current_img_acq4), torch.abs(current_img_acq5),\
+             torch.abs(current_img_acq6), torch.abs(current_img_acq7), torch.abs(current_img_acq8), torch.abs(current_img_acq9) # org
         # return current_img_acq1, current_img_acq2, current_img_acq3, current_img_acq4, current_img_acq5
 
     def forward(

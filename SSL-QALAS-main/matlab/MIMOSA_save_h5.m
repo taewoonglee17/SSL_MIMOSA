@@ -139,7 +139,7 @@ for i = 1:Nacq
 end
 
 % Update dimensions
-[Ny, Nx, ~] = size(T1_map);  % these are now updated after rotation + flip
+[Nx, Ny, ~] = size(T1_map);  % these are now updated after rotation + flip
 
 toc
 
@@ -169,25 +169,28 @@ saveh5(data_to_save, file_name, 'ComplexFormat', {'r','i'}, 'RootName', '/');
 % If real-valued:
 saveh5(data_to_save, file_name, 'RootName', '/');
 
-h5create(file_name,'/reconstruction_t1',[Ny,Nx,Nz],'Datatype','single');
+h5create(file_name,'/reconstruction_t1',[Nx,Ny,Nz],'Datatype','single');
 h5write(file_name, '/reconstruction_t1', T1_map);
-h5create(file_name,'/reconstruction_t2',[Ny,Nx,Nz],'Datatype','single');
+h5create(file_name,'/reconstruction_t2',[Nx,Ny,Nz],'Datatype','single');
 h5write(file_name, '/reconstruction_t2', T2_map);
-h5create(file_name,'/reconstruction_t2s',[Ny,Nx,Nz],'Datatype','single');
+h5create(file_name,'/reconstruction_t2s',[Nx,Ny,Nz],'Datatype','single');
 h5write(file_name, '/reconstruction_t2s', T2s_map);
-h5create(file_name,'/reconstruction_pd',[Ny,Nx,Nz],'Datatype','single');
+h5create(file_name,'/reconstruction_pd',[Nx,Ny,Nz],'Datatype','single');
 h5write(file_name, '/reconstruction_pd', PD_map);
-h5create(file_name,'/reconstruction_ie',[Ny,Nx,Nz],'Datatype','single');
+h5create(file_name,'/reconstruction_ie',[Nx,Ny,Nz],'Datatype','single');
 h5write(file_name, '/reconstruction_ie', IE_map);
-h5create(file_name,'/reconstruction_b1',[Ny,Nx,Nz],'Datatype','single');
+h5create(file_name,'/reconstruction_b1',[Nx,Ny,Nz],'Datatype','single');
 h5write(file_name, '/reconstruction_b1', B1_map);
+
+fprintf('mask(:,1) size: [%d, %d]\n', size(mask(1,:)'));
+fprintf('Ny: %d\n', Ny);
 
 for i = 1:Nacq
     h5create(file_name,sprintf('/mask_acq%d',i),[Ny,1],'Datatype','single');
-    h5write(file_name,sprintf('/mask_acq%d',i),mask(:,1));
+    h5write(file_name,sprintf('/mask_acq%d',i), mask(1,:)');
 end
 
-h5create(file_name,'/mask_brain',[Ny,Nx,Nz],'Datatype','single');
+h5create(file_name,'/mask_brain',[Nx,Ny,Nz],'Datatype','single');
 h5write(file_name, '/mask_brain', single(bmask));
 
 % Attributes
