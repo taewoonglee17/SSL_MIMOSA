@@ -35,11 +35,11 @@ end
 % Make them real valued
 input_img = abs(input_img);
 T1_map  = abs(single(T1_map));
-T2_map  = abs(single(T2_map));
-T2s_map = abs(single(T2s_map));
-PD_map  = abs(single(PD_map));
-IE_map  = abs(single(IE_map));
-img_b1 = abs(single(img_b1));
+T2_map  = abs(singleT2_map);
+T2s_map = abs(singleT2s_map);
+PD_map  = abs(singlePD_map);
+IE_map  = abs(singleIE_map);
+img_b1 = abs(img_b1);
 
 toc
 
