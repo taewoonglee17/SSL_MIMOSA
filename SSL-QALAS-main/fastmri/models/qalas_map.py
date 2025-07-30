@@ -318,25 +318,28 @@ class QALASBlock(nn.Module):
         tr = torch.Tensor([4.5]).to(x_t1.device)                                # TR
         time_relax_end = torch.Tensor([0]).to(x_t1.device)                      # Relax time at the end
         echo2use = 1                                                            # Index of echo to use
+        te_flash = torch.Tensor([2.29e-3]).to(x_t1.device)                      # TE for FLASH
+        tr_mre = torch.Tensor([0]).to(x_t1.device)                              # TR for MRE
 
         # Timings
         delt_m1_m2 = t2_prep                                # (t2_prep = 0.1097)
-        delt_m0_m1 = gap_bw_ro - etl - delt_m1_m2           # (0.9 - 0.7296 - 0.1097 = 0.0607)
+        delt_m0_m1 = torch.Tensor([0]).to(x_t1.device)      
         delt_m2_m3 = etl                                    # Duration of readout #1 = 0.7296
         delt_m2_m6 = gap_bw_ro                              # Gap b/w readouts = 0.9
         delt_m4_m5 = torch.Tensor([0.0128]).to(x_t1.device)          # Inversion pulse = 0.0128
         delt_m5_m6 = torch.Tensor([0.1 - 0.00645]).to(x_t1.device)   # Gap b/w end of inversion pulse and start of readout #2 = 0.0355
         delt_m3_m4 = delt_m2_m6 - delt_m2_m3 - delt_m4_m5 - delt_m5_m6 # Gap b/w end of readout #1 and start of inversion pulse = 0.9 - 0.7296 - 0.0128 - 0.0355 = 0.1221
         delt_m6_m7 = etl                                    # Duration of readout #2 = 0.7296
-        delt_m7_m8 = gap_bw_ro - etl                        # From end of readout #2 to begin of readout #3 = 0.1704
+        delt_m7_m8 = torch.Tensor([1e-3]).to(x_t1.device)      
         delt_m8_m9 = etl                                    # Duration of readout #3 = 0.7296
-        delt_m9_m10 = gap_bw_ro - etl                       # From end of readout #3 to begin of readout #4 = 0.1704
+        delt_m9_m10 = torch.Tensor([1e-3]).to(x_t1.device)
         delt_m10_m11 = etl                                  # Duration of readout #4 = 0.7296
         delt_m11_m12 = gap_bw_ro - etl                      # From end of readout #4 to begin of readout #5 = 0.1704
         delt_m12_m13 = etl                                  # Duration of readout #5 = 0.7296
+        delt_m12_m13_mte = tr_mre * tf
         total_duration = delt_m0_m1 + delt_m1_m2 + delt_m2_m3 + delt_m3_m4 + delt_m4_m5 + delt_m5_m6 + delt_m6_m7 + \
-                            delt_m7_m8 + delt_m8_m9 + delt_m9_m10 + delt_m10_m11 + delt_m11_m12 + delt_m12_m13
-        delt_m13_end = torch.maximum(tr - total_duration, torch.Tensor([0]).to(x_t1.device))
+                            delt_m7_m8 + delt_m8_m9 + delt_m9_m10 + delt_m10_m11 + delt_m11_m12 + delt_m12_m13 + delt_m12_m13_mte
+        delt_m13_end = gap_bw_ro - etl - delt_m1_m2
         if time_relax_end > 0:
             delt_m13_end = delt_m13_end + time_relax_end
 
@@ -348,14 +351,13 @@ class QALASBlock(nn.Module):
         Ed6 = torch.exp(-(delt_m5_m6) / (x_t1 + eps))
         Ed8 = torch.exp(-(delt_m7_m8) / (x_t1 + eps))
         Ed10 = torch.exp(-(delt_m9_m10) / (x_t1 + eps))
-        Ed12 = torch.exp(-(delt_m11_m12) / (x_t1 + eps))
-        Ed14 = torch.exp(-(delt_m13_end) / (x_t1 + eps))
         Eda = torch.exp(-(0.0097) / (x_t1 + eps))
         Edb = torch.exp(-(0.) / (x_t1 + eps))
         x_t1_star = x_t1 * (1 / (1 - x_t1 * torch.log(torch.cos(np.pi / 180 * flip_ang)) / esp))
         x_m0_star = x_m0 * (1 - torch.exp(-esp / (x_t1 + eps))) / (1 - torch.exp(-esp / (x_t1_star + eps)))
         Eetl = torch.exp(-etl / (x_t1_star + eps))
         Eesp = torch.exp(-esp / (x_t1 + eps))
+        Eteflash = torch.exp(-te_flash / (x_t2s + eps))
 
         num_rep = 5 # number of repetitions to simulate to reach steady state
         m_current = x_m0                                                                                # M0
@@ -367,36 +369,22 @@ class QALASBlock(nn.Module):
                                     torch.cos(t2_rad) * torch.cos(t2_rad) * ET1)                        # M2, w/ b1 cor.
             m_current = x_m0 * (1 - Eda) + m_current * Eda                                              # M2 (del_t = 0.0097)
             # current_img_acq1 = m_current                                                                ### Acq1
-            current_img_acq1 = m_current * torch.sin(np.pi / 180 * flip_ang)                            ### Acq1
+            current_img_acq1 = m_current * torch.sin(np.pi / 180 * flip_ang) * Eteflash                 ### Acq1
             m_current = x_m0_star * (1 - Eetl) + m_current * Eetl                                       # M3 (del_t = 0.7296)
             m_current = x_m0 * (1 - Ed4) + m_current * Ed4                                              # M4 (del_t = 0.1221)
             m_current = -m_current * x_ie                                                               # M5
             m_current = x_m0 * (1 - Ed6) + m_current * Ed6                                              # M6 (del_t = 0.0355)
             m_current = x_m0 * (1 - Edb) + m_current * Edb                                              # M6 (del_t = 0)
             # current_img_acq2 = m_current                                                                ### Acq2
-            current_img_acq2 = m_current * torch.sin(np.pi / 180 * flip_ang)                            ### Acq2
+            current_img_acq2 = m_current * torch.sin(np.pi / 180 * flip_ang) * Eteflash                 ### Acq2
             m_current = x_m0_star * (1 - Eetl) + m_current * Eetl                                       # M7 (del_t = 0.7296)
             m_current = x_m0 * (1 - Ed8) + m_current * Ed8                                              # M8 (del_t = 0.1704)
             m_current = x_m0 * (1 - Edb) + m_current * Edb                                              # M8 (del_t = 0)
             # current_img_acq3 = m_current                                                                ### Acq3
-            current_img_acq3 = m_current * torch.sin(np.pi / 180 * flip_ang)                            ### Acq3
+            current_img_acq3 = m_current * torch.sin(np.pi / 180 * flip_ang) * Eteflash                 ### Acq3
             m_current = x_m0_star * (1 - Eetl) + m_current * Eetl                                       # M9 (del_t = 0.7296)
             m_current = x_m0 * (1 - Ed10) + m_current * Ed10                                            # M10 (del_t = 0.1704)
             m_current = x_m0 * (1 - Edb) + m_current * Edb                                              # M10 (del_t = 0)
-            # current_img_acq4 = m_current                                                                ### Acq4
-            current_img_acq4 = m_current * torch.sin(np.pi / 180 * flip_ang)                            ### Acq4
-            m_current = x_m0_star * (1 - Eetl) + m_current * Eetl                                       # M11 (del_t = 0.7296)
-            m_current = x_m0 * (1 - Ed12) + m_current * Ed12                                            # M12 (del_t = 0.1704)
-            m_current = x_m0 * (1 - Edb) + m_current * Edb                                              # M12 (del_t = 0)
-            # current_img_acq5 = m_current                                                                ### Acq5
-            current_img_acq5 = m_current * torch.sin(np.pi / 180 * flip_ang)                            ### Acq5
-            m_current = x_m0_star * (1 - Eetl) + m_current * Eetl                                       # M13 (del_t = 0.7296)
-            m_current = x_m0 * (1 - Ed14) + m_current * Ed14                                            # M14
-
-            current_img_acq6 = m_current * torch.sin(np.pi / 180 * flip_ang)     
-            current_img_acq7 = m_current * torch.sin(np.pi / 180 * flip_ang)     
-            current_img_acq8 = m_current * torch.sin(np.pi / 180 * flip_ang)     
-            current_img_acq9 = m_current * torch.sin(np.pi / 180 * flip_ang)     
 
 
         return torch.abs(current_img_acq1), torch.abs(current_img_acq2), torch.abs(current_img_acq3), torch.abs(current_img_acq4), torch.abs(current_img_acq5),\
