@@ -34,13 +34,13 @@ def run_model(batch, model, device):
     # ie = torch.from_numpy(ie_mat['ie']) # for dict_v4 IE
     crop_size = batch.crop_size
 
-    output_t1, output_t2, output_pd, output_ie, output_b1, \
-        output_img1, output_img2, output_img3, output_img4, output_img5 = \
+    output_t1, output_t2, output_pd, output_ie, output_b1, output_t2s,\
+        output_img1, output_img2, output_img3, output_img4, output_img5, output_img6, output_img7, output_img8, output_img9 = \
             model(batch.masked_kspace_acq1.to(device), batch.masked_kspace_acq2.to(device), batch.masked_kspace_acq3.to(device), batch.masked_kspace_acq4.to(device), batch.masked_kspace_acq5.to(device), \
-                batch.mask_acq1, batch.mask_acq2, batch.mask_acq3, batch.mask_acq4, batch.mask_acq5, batch.mask_brain, \
-                # batch.b1, ie, \
+                  batch.masked_kspace_acq6.to(device), batch.masked_kspace_acq7.to(device), batch.masked_kspace_acq8.to(device), batch.masked_kspace_acq9.to(device), \
+                batch.mask_acq1, batch.mask_acq2, batch.mask_acq3, batch.mask_acq4, batch.mask_acq5, batch.mask_acq6, batch.mask_acq7, batch.mask_acq8, batch.mask_acq9, batch.mask_brain, \
                 batch.b1, batch.ie, \
-                batch.max_value_t1.to(device), batch.max_value_t2.to(device), batch.max_value_pd.to(device), batch.num_low_frequencies.to(device))
+                batch.max_value_t1.to(device), batch.max_value_t2.to(device), batch.max_value_pd.to(device), batch.max_value_t2s.to(device), batch.num_low_frequencies.to(device))
 
     # detect FLAIR 203
     if output_t1.shape[-1] < crop_size[1]:
@@ -51,12 +51,14 @@ def run_model(batch, model, device):
     output_pd = T.center_crop(output_pd, crop_size)[0]
     output_ie = T.center_crop(output_ie, crop_size)[0]
     output_b1 = T.center_crop(output_b1, crop_size)[0]
+    output_t2s = T.center_crop(output_t2s, crop_size)[0]
 
     output_t1 = output_t1 * batch.mask_brain.to(device)
     output_t2 = output_t2 * batch.mask_brain.to(device)
     output_pd = output_pd * batch.mask_brain.to(device)
     output_ie = output_ie * batch.mask_brain.to(device)
     output_b1 = output_b1 * batch.mask_brain.to(device)
+    output_t2s = output_t2s * batch.mask_brain.to(device)
 
     ### for dict_v4 IE
     # b, nx, ny = output_ie.shape
@@ -70,7 +72,7 @@ def run_model(batch, model, device):
     #         output_ie[:,x,:] = ie_[t2_idx,t1_idx].unsqueeze(0)
     ###
 
-    return output_t1, output_t2, output_pd, output_ie, output_b1, int(batch.slice_num[0]), batch.fname[0]
+    return output_t1, output_t2, output_pd, output_ie, output_b1, output_t2s, int(batch.slice_num[0]), batch.fname[0]
 
 def load_model(
     module_class: pl.LightningModule,
@@ -111,16 +113,18 @@ def run_inference(challenge, state_dict_file, data_path, output_path, device):
     outputs_pd = defaultdict(list)
     outputs_ie = defaultdict(list)
     outputs_b1 = defaultdict(list)
+    outputs_t2s = defaultdict(list)
     model = model.to(device)
 
     for batch in tqdm(dataloader, desc="Running inference"):
         with torch.no_grad():
-            output_t1, output_t2, output_pd, output_ie, output_b1, slice_num, fname = run_model(batch, model, device)
+            output_t1, output_t2, output_pd, output_ie, output_b1, output_t2s, slice_num, fname = run_model(batch, model, device)
         outputs_t1[fname].append((slice_num, np.transpose(np.squeeze(output_t1.cpu()),(1,0))))
         outputs_t2[fname].append((slice_num, np.transpose(np.squeeze(output_t2.cpu()),(1,0))))
         outputs_pd[fname].append((slice_num, np.transpose(np.squeeze(output_pd.cpu()),(1,0))))
         outputs_ie[fname].append((slice_num, np.transpose(np.squeeze(output_ie.cpu()),(1,0))))
         outputs_b1[fname].append((slice_num, np.transpose(np.squeeze(output_b1.cpu()),(1,0))))
+        outputs_t2s[fname].append((slice_num, np.transpose(np.squeeze(output_t2s.cpu()),(1,0))))
 
     # save outputs
     for fname in outputs_t1:
@@ -129,8 +133,9 @@ def run_inference(challenge, state_dict_file, data_path, output_path, device):
         outputs_pd[fname] = np.stack([out for _, out in sorted(outputs_pd[fname])])
         outputs_ie[fname] = np.stack([out for _, out in sorted(outputs_ie[fname])])
         outputs_b1[fname] = np.stack([out for _, out in sorted(outputs_b1[fname])])
+        outputs_t2s[fname] = np.stack([out for _, out in sorted(outputs_t2s[fname])])
 
-    fastmri.save_reconstructions_qalas(outputs_t1, outputs_t2, outputs_pd, outputs_ie, outputs_b1, output_path / "reconstructions")
+    fastmri.save_reconstructions_qalas(outputs_t1, outputs_t2, outputs_pd, outputs_ie, outputs_b1, outputs_t2s, output_path / "reconstructions")
 
     end_time = time.perf_counter()
 

@@ -360,7 +360,6 @@ class QALASBlock(nn.Module):
         Eetl = torch.exp(-etl / (x_t1_star + eps))
         Eesp = torch.exp(-esp / (x_t1 + eps))
         Eteflash = torch.exp(-te_flash / (x_t2s + eps))
-        Etes = torch.exp(-TEs / (x_t2s + eps))
         
         num_rep = 5 # number of repetitions to simulate to reach steady state
         m_current = x_m0                                                                                # M0
@@ -390,7 +389,9 @@ class QALASBlock(nn.Module):
 
             #MGRE Readout
             m_current = x_m0 * (1 - Etrmte) + m_current * Etrmte                                        # M10 (del_t = tr_mte = 27.5e-3)
-            mxy_echos = m_current * torch.sin(np.pi / 180 * flip_ang) * Etes                            #MGRE Echos
+            mxy_echos = []  # list to hold each echo image
+            for i in range(6):                          
+                mxy_echos.append(m_current * torch.sin(np.pi / 180 * flip_ang) * torch.exp(-TEs[i] / (x_t2s + eps)))    #MGRE Echos
             current_img_acq4 = mxy_echos[0]
             current_img_acq5 = mxy_echos[1]
             current_img_acq6 = mxy_echos[2]
