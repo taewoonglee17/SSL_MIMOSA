@@ -321,6 +321,7 @@ class QALASBlock(nn.Module):
         te_flash = torch.Tensor([2.29e-3]).to(x_t1.device)                      # TE for FLASH
         tr_mte = torch.Tensor([27.5e-3]).to(x_t1.device)                              # TR for MRE
         etl_mgre = tf * tr_mte
+        etl_mgre_1 = (tf-1) * tr_mte
         TEs = torch.tensor([0.0027, 0.0070, 0.0113, 0.0156, 0.0199, 0.0242]).to(x_t1.device)     # MGRE Echo Times
 
         # Timings
@@ -353,7 +354,8 @@ class QALASBlock(nn.Module):
         Ed13e = torch.exp(-(delt_m13_end) / (x_t1 + eps))
         Eda = torch.exp(-(0.0097) / (x_t1 + eps))
         Edb = torch.exp(-(0.) / (x_t1 + eps))
-        Eetl_mgre = torch.exp(-(etl_mgre) / (x_t1 + eps))
+        Etrmte = torch.exp(-(tr_mte) / (x_t1 + eps))
+        Eetl_mgre_1 = torch.exp(-(etl_mgre_1) / (x_t1 + eps))
         x_t1_star = x_t1 * (1 / (1 - x_t1 * torch.log(torch.cos(np.pi / 180 * flip_ang)) / esp))
         x_m0_star = x_m0 * (1 - torch.exp(-esp / (x_t1 + eps))) / (1 - torch.exp(-esp / (x_t1_star + eps)))
         Eetl = torch.exp(-etl / (x_t1_star + eps))
@@ -389,7 +391,7 @@ class QALASBlock(nn.Module):
             m_current = x_m0 * (1 - Ed10) + m_current * Ed10                                            # M10 (del_t = 0.1704)
 
             #MGRE Readout
-            m_current = x_m0 * (1 - Edb) + m_current * Edb                                        # M10 (del_t = 0)
+            m_current = x_m0 * (1 - Eetl_mgre_1) + m_current * Eetl_mgre_1                                        # M10 (del_t = 0)
             mxy_echos = []  # list to hold each echo image
             for i in range(6):                          
                 mxy_echos.append(m_current * torch.sin(np.pi / 180 * flip_ang) * torch.exp(-TEs[i] / (x_t2s + eps)))    #MGRE Echos
@@ -399,7 +401,7 @@ class QALASBlock(nn.Module):
             current_img_acq7 = mxy_echos[3]
             current_img_acq8 = mxy_echos[4]
             current_img_acq9 = mxy_echos[5]
-            m_current = x_m0_star * (1 - Eetl_mgre) + m_current * Eetl_mgre                                       # M13
+            m_current = x_m0_star * (1 - Etrmte) + m_current * Etrmte                                      # M13
             m_current = x_m0 * (1 - Ed13e) + m_current * Ed13e
 
         return torch.abs(current_img_acq1), torch.abs(current_img_acq2), torch.abs(current_img_acq3), torch.abs(current_img_acq4), torch.abs(current_img_acq5),\
