@@ -320,6 +320,7 @@ class QALASBlock(nn.Module):
         echo2use = 1                                                            # Index of echo to use
         te_flash = torch.Tensor([2.29e-3]).to(x_t1.device)                      # TE for FLASH
         tr_mte = torch.Tensor([27.5e-3]).to(x_t1.device)                              # TR for MRE
+        etl_mgre = tf * tr_mte
         TEs = torch.tensor([0.0027, 0.0070, 0.0113, 0.0156, 0.0199, 0.0242]).to(x_t1.device)     # MGRE Echo Times
 
         # Timings
@@ -333,13 +334,10 @@ class QALASBlock(nn.Module):
         delt_m6_m7 = etl                                    # Duration of readout #2 = 0.7296
         delt_m7_m8 = torch.Tensor([1e-3]).to(x_t1.device)      
         delt_m8_m9 = etl                                    # Duration of readout #3 = 0.7296
-        delt_m9_m10 = torch.Tensor([1e-3]).to(x_t1.device)
-        delt_m10_m11 = etl                                  # Duration of readout #4 = 0.7296
-        delt_m11_m12 = gap_bw_ro - etl                      # From end of readout #4 to begin of readout #5 = 0.1704
-        delt_m12_m13 = etl                                  # Duration of readout #5 = 0.7296
-        delt_m12_m13_mte = tr_mte * tf
+        delt_m9_m10 = torch.Tensor([1e-3]).to(x_t1.device)                           
+        delt_m12_m13_mte = etl_mgre                         # Duration of MGRE readout
         total_duration = delt_m0_m1 + delt_m1_m2 + delt_m2_m3 + delt_m3_m4 + delt_m4_m5 + delt_m5_m6 + delt_m6_m7 + \
-                            delt_m7_m8 + delt_m8_m9 + delt_m9_m10 + delt_m10_m11 + delt_m11_m12 + delt_m12_m13 + delt_m12_m13_mte
+                            delt_m7_m8 + delt_m8_m9 + delt_m9_m10 + delt_m12_m13_mte
         delt_m13_end = gap_bw_ro - etl - delt_m1_m2
         if time_relax_end > 0:
             delt_m13_end = delt_m13_end + time_relax_end
@@ -352,9 +350,10 @@ class QALASBlock(nn.Module):
         Ed6 = torch.exp(-(delt_m5_m6) / (x_t1 + eps))
         Ed8 = torch.exp(-(delt_m7_m8) / (x_t1 + eps))
         Ed10 = torch.exp(-(delt_m9_m10) / (x_t1 + eps))
+        Ed13e = torch.exp(-(delt_m13_end) / (x_t1 + eps))
         Eda = torch.exp(-(0.0097) / (x_t1 + eps))
         Edb = torch.exp(-(0.) / (x_t1 + eps))
-        Etrmte = torch.exp(-tr_mte / (x_t1 + eps))
+        Eetl_mgre = torch.exp(-(etl_mgre) / (x_t1 + eps))
         x_t1_star = x_t1 * (1 / (1 - x_t1 * torch.log(torch.cos(np.pi / 180 * flip_ang)) / esp))
         x_m0_star = x_m0 * (1 - torch.exp(-esp / (x_t1 + eps))) / (1 - torch.exp(-esp / (x_t1_star + eps)))
         Eetl = torch.exp(-etl / (x_t1_star + eps))
@@ -376,11 +375,13 @@ class QALASBlock(nn.Module):
             m_current = x_m0 * (1 - Ed4) + m_current * Ed4                                              # M4 (del_t = 0.1221)
             m_current = -m_current * x_ie                                                               # M5
             m_current = x_m0 * (1 - Ed6) + m_current * Ed6                                              # M6 (del_t = 0.0355)
+            
             m_current = x_m0 * (1 - Edb) + m_current * Edb                                              # M6 (del_t = 0)
             # current_img_acq2 = m_current                                                                ### Acq2
             current_img_acq2 = m_current * torch.sin(np.pi / 180 * flip_ang) * Eteflash                 ### Acq2
             m_current = x_m0_star * (1 - Eetl) + m_current * Eetl                                       # M7 (del_t = 0.7296)
             m_current = x_m0 * (1 - Ed8) + m_current * Ed8                                              # M8 (del_t = 0.1704)
+            
             m_current = x_m0 * (1 - Edb) + m_current * Edb                                              # M8 (del_t = 0)
             # current_img_acq3 = m_current                                                                ### Acq3
             current_img_acq3 = m_current * torch.sin(np.pi / 180 * flip_ang) * Eteflash                 ### Acq3
@@ -388,7 +389,7 @@ class QALASBlock(nn.Module):
             m_current = x_m0 * (1 - Ed10) + m_current * Ed10                                            # M10 (del_t = 0.1704)
 
             #MGRE Readout
-            m_current = x_m0 * (1 - Etrmte) + m_current * Etrmte                                        # M10 (del_t = tr_mte = 27.5e-3)
+            m_current = x_m0 * (1 - Edb) + m_current * Edb                                        # M10 (del_t = 0)
             mxy_echos = []  # list to hold each echo image
             for i in range(6):                          
                 mxy_echos.append(m_current * torch.sin(np.pi / 180 * flip_ang) * torch.exp(-TEs[i] / (x_t2s + eps)))    #MGRE Echos
@@ -398,7 +399,8 @@ class QALASBlock(nn.Module):
             current_img_acq7 = mxy_echos[3]
             current_img_acq8 = mxy_echos[4]
             current_img_acq9 = mxy_echos[5]
-            m_current = x_m0_star * (1 - Eetl) + m_current * Eetl                                       # M13
+            m_current = x_m0_star * (1 - Eetl_mgre) + m_current * Eetl_mgre                                       # M13
+            m_current = x_m0 * (1 - Ed13e) + m_current * Ed13e
 
         return torch.abs(current_img_acq1), torch.abs(current_img_acq2), torch.abs(current_img_acq3), torch.abs(current_img_acq4), torch.abs(current_img_acq5),\
              torch.abs(current_img_acq6), torch.abs(current_img_acq7), torch.abs(current_img_acq8), torch.abs(current_img_acq9) # org

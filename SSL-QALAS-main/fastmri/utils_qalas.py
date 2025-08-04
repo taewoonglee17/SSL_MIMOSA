@@ -14,7 +14,7 @@ import numpy as np
 
 def save_reconstructions_qalas(reconstructions_t1: Dict[str, np.ndarray], reconstructions_t2: Dict[str, np.ndarray], \
                             reconstructions_pd: Dict[str, np.ndarray], reconstructions_ie: Dict[str, np.ndarray], \
-                            reconstructions_b1: Dict[str, np.ndarray], out_dir: Path):
+                            reconstructions_b1: Dict[str, np.ndarray], reconstructions_t2s: Dict[str, np.ndarray], out_dir: Path):
     """
     Save reconstruction images.
 
@@ -33,16 +33,20 @@ def save_reconstructions_qalas(reconstructions_t1: Dict[str, np.ndarray], recons
         recons_pd = reconstructions_pd[fname]
         recons_ie = reconstructions_ie[fname]
         recons_b1 = reconstructions_b1[fname]
+        recons_t2s = reconstructions_t2s[fname]
         with h5py.File(out_dir / fname, "w") as hf:
             hf.create_dataset("reconstruction_t1", data=recons_t1)
             hf.create_dataset("reconstruction_t2", data=recons_t2)
             hf.create_dataset("reconstruction_pd", data=recons_pd)
             hf.create_dataset("reconstruction_ie", data=recons_ie)
             hf.create_dataset("reconstruction_b1", data=recons_b1)
+            hf.create_dataset("reconstruction_t2s", data=recons_t2s)
 
 def save_reconstructions_qalas_forward(reconstructions_img1: Dict[str, np.ndarray], reconstructions_img2: Dict[str, np.ndarray], \
                             reconstructions_img3: Dict[str, np.ndarray], reconstructions_img4: Dict[str, np.ndarray], \
-                            reconstructions_img5: Dict[str, np.ndarray], out_dir: Path):
+                            reconstructions_img5: Dict[str, np.ndarray], reconstructions_img6: Dict[str, np.ndarray], \
+                            reconstructions_img7: Dict[str, np.ndarray], reconstructions_img8: Dict[str, np.ndarray], \
+                            reconstructions_img9: Dict[str, np.ndarray], out_dir: Path):
     """
     Save reconstruction images.
 
@@ -61,12 +65,20 @@ def save_reconstructions_qalas_forward(reconstructions_img1: Dict[str, np.ndarra
         recons_img3 = reconstructions_img3[fname]
         recons_img4 = reconstructions_img4[fname]
         recons_img5 = reconstructions_img5[fname]
+        recons_img6 = reconstructions_img6[fname]
+        recons_img7 = reconstructions_img7[fname]
+        recons_img8 = reconstructions_img8[fname]
+        recons_img9 = reconstructions_img9[fname]
         with h5py.File(out_dir / fname, "w") as hf:
             hf.create_dataset("reconstruction_img1", data=recons_img1)
             hf.create_dataset("reconstruction_img2", data=recons_img2)
             hf.create_dataset("reconstruction_img3", data=recons_img3)
             hf.create_dataset("reconstruction_img4", data=recons_img4)
             hf.create_dataset("reconstruction_img5", data=recons_img5)
+            hf.create_dataset("reconstruction_img6", data=recons_img6)
+            hf.create_dataset("reconstruction_img7", data=recons_img7)
+            hf.create_dataset("reconstruction_img8", data=recons_img8)
+            hf.create_dataset("reconstruction_img9", data=recons_img9)
 
 def convert_fnames_to_v2(path: Path):
     """
