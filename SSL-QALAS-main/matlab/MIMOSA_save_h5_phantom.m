@@ -210,3 +210,5 @@ dset.writexml(xmlstring);
 dset.close();
 
 toc
+
+copyfile(fullfile(savepath, savename), '/autofs/space/marduk_001/users/tommy/mimosa_data/multicoil_val/mimosa_val.h5');

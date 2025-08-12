@@ -43,7 +43,8 @@ def run_model(batch, model, device):
                 batch.max_value_t1.to(device), batch.max_value_t2.to(device), batch.max_value_pd.to(device), batch.max_value_t2s.to(device), batch.num_low_frequencies.to(device))
 
     # detect FLAIR 203
-    if output_t1.shape[-1] < crop_size[1]:
+    # Ensure crop size matches output shape
+    if output_t1.shape[-2:] != crop_size:
         crop_size = output_t1.shape[-2:]
 
     output_t1 = T.center_crop(output_t1, crop_size)[0]
