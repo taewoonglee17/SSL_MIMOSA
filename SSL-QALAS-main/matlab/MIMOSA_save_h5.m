@@ -34,9 +34,9 @@ end
 
 % Make them real valued
 input_img = abs(input_img);
-T1_map  = abs(single(T1_map));
-T2_map  = abs(single(T2_map));
-T2s_map = abs(single(T2s_map));
+T1_map  = abs(single(T1_map))/1000;
+T2_map  = abs(single(T2_map))/1000;
+T2s_map = abs(single(T2s_map))/1000;
 PD_map  = abs(single(PD_map));
 IE_map  = abs(single(IE_map));
 img_b1 = abs(single(img_b1));

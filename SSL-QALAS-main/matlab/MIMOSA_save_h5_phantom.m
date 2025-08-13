@@ -53,7 +53,15 @@ img_b1 = abs(single(img_b1));
 
 toc
 
-bmask = ones(Nx, Ny, Nz, 'single');  % Placeholder for brain mask
+% Brain Mask
+%% Load ROI mask and make brain mask
+roiData = load('/autofs/space/marduk_001/users/tommy/20240820_nist/mask_rois_T2pla.mat', 'mask_rois');
+
+% Sum across the 10 slices
+bmask = sum(single(roiData.mask_rois), 3);
+
+% Convert to binary mask (recommended so it's just 0 or 1)
+bmask = single(bmask > 0);
 
 %% Normalize
 
