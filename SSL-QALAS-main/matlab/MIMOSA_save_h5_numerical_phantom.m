@@ -19,7 +19,7 @@ b1_type             = 2;
 fprintf('loading data ... ');
 tic
 
-load('/autofs/space/marduk_001/users/tommy/20240820_nist/slice29_T2pla_IElkp_dict_v2.mat', 'img', 'T1_map', 'T2_map', 'T2std', 'PD_map', 'IE_map','img_b1');
+load('/autofs/space/marduk_001/users/tommy/num_phantom_sim_mimosa/numerical_phantom_SSL_input.mat', 'img', 'T1_map', 'T2_map', 'T2std', 'PD_map', 'IE_map','img_b1');
 
 % Name them consistently with previous script
 input_img = img;
@@ -52,16 +52,32 @@ IE_map  = abs(single(IE_map));
 img_b1 = abs(single(img_b1));
 
 toc
+%% Brain intensity statistics
 
+for slc = 1:Nz
+    % Root-sum-of-squares over coil/channel dimension (5th dim)
+    slc_img = squeeze(rsos(input_img(:,:,slc,1,:),5));
+
+    % Compute statistics
+    min_val   = min(slc_img(:));
+    max_val   = max(slc_img(:));
+    mean_val  = mean(slc_img(:));
+    median_val = median(slc_img(:));
+    p90_val   = prctile(slc_img(:),90);
+    p99_val   = prctile(slc_img(:),99);
+
+    fprintf('Slice %d -> min: %.3f, max: %.3f, mean: %.3f, median: %.3f, p90: %.3f, p99: %.3f\n', ...
+            slc, min_val, max_val, mean_val, median_val, p90_val, p99_val);
+end
 % Brain Mask
-%% Load ROI mask and make brain mask
-roiData = load('/autofs/space/marduk_001/users/tommy/20240820_nist/mask_rois_T2pla.mat', 'mask_rois');
+threshold = 0.04; % Slice 1 -> min: 0.000, max: 0.102, mean: 0.047, median: 0.082, p90: 0.096, p99: 0.101
 
-% Sum across the 10 slices
-bmask = sum(single(roiData.mask_rois), 3);
+[Nx,Ny,Nz,~,~]  = size(input_img);
+bmask           = zeros(Nx,Ny,Nz,'single');
 
-% Convert to binary mask (recommended so it's just 0 or 1)
-bmask = single(bmask > 0);
+for slc = 1:size(input_img,3)
+   bmask(:,:,slc) = imfill(squeeze(rsos(input_img(:,:,slc,1,:),5)) > threshold, 'holes');
+end
 
 %% Normalize
 
@@ -94,19 +110,6 @@ B1_map      = permute(B1_map,[2,1,3]);
 
 bmask       = permute(bmask,[2,1,3]);
 mask        = permute(mask,[2,1]);
-
-% Save the ROI-based mask for RMSE use
-bmask_rmse  = bmask;
-
-% Create a centered circular mask with diameter 180 (pixels)
-D = 180;
-[xx, yy] = meshgrid(1:Nx, 1:Ny);      % yy: Ny x Nx, xx: Ny x Nx
-cx = (Nx + 1)/2; 
-cy = (Ny + 1)/2;
-r  = D/2;
-
-mask_circ2d = single( (xx - cx).^2 + (yy - cy).^2 <= r^2 );
-bmask = repmat(mask_circ2d, [1, 1, Nz]);  % overwrite bmask to be circular
 
 for i = 1:Nacq
     kspace_acq{i} = single(input_img(:,:,:,:,i));
@@ -152,11 +155,8 @@ for i = 1:Nacq
 end
 
 % Save masks
-h5create(file_name,'/mask_brain',[Ny,Nx,Nz],'Datatype','single');          % circular
+h5create(file_name,'/mask_brain',[Ny,Nx,Nz],'Datatype','single');        
 h5write(file_name, '/mask_brain', single(bmask));
-
-h5create(file_name,'/mask_brain_rmse',[Ny,Nx,Nz],'Datatype','single');     % original ROI sum mask
-h5write(file_name, '/mask_brain_rmse', single(bmask_rmse));
 
 % Attributes
 h5writeatt(file_name,'/','norm_t1',norm(T1_map(:)));
