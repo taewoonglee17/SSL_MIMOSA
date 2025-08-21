@@ -19,7 +19,7 @@ b1_type             = 2;
 fprintf('loading data ... ');
 tic
 
-load('/autofs/space/marduk_001/users/tommy/20240820_nist/slice29_T2pla_IElkp_dict_v2.mat', 'img', 'T1_map', 'T2_map', 'T2std', 'PD_map', 'IE_map','img_b1');
+load('/autofs/space/marduk_001/users/tommy/20240820_nist/slice29_T2pla_IElkp_dict_doub.mat', 'img', 'T1_map', 'T2_map', 'T2std', 'PD_map', 'IE_map','img_b1');
 
 % Name them consistently with previous script
 input_img = img;
