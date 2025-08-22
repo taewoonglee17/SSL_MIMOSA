@@ -19,11 +19,11 @@ b1_type             = 2;
 fprintf('loading data ... ');
 tic
 
-load('/autofs/space/marduk_001/users/tommy/num_phantom_sim_mimosa/numerical_phantom_SSL_input.mat', 'img', 'T1_slc', 'T2_slc', 'T2std', 'PD_slc', 'IE_slc','img_b1');
+load('/autofs/space/marduk_001/users/tommy/num_phantom_sim_mimosa/numerical_phantom_SSL_input.mat', 'img', 'T1_slc', 'T2_slc', 'T2s_slc', 'PD_slc', 'IE_slc','img_b1');
 
 % Name them consistently with previous script
 input_img = img;
-T2s_map = T2std;
+T2s_map = T2s_slc;
 T1_map = T1_slc;
 T2_map = T2_slc;
 PD_map = PD_slc;
@@ -74,7 +74,7 @@ for slc = 1:Nz
             slc, min_val, max_val, mean_val, median_val, p90_val, p99_val);
 end
 % Brain Mask
-threshold = 0.03; % Slice 1 -> min: 0.000, max: 0.102, mean: 0.047, median: 0.082, p90: 0.096, p99: 0.101
+threshold = 0.04; % Slice 1 -> min: 0.000, max: 0.102, mean: 0.047, median: 0.082, p90: 0.096, p99: 0.101
 
 [Nx,Ny,Nz,~,~]  = size(input_img);
 bmask           = zeros(Nx,Ny,Nz,'single');
