@@ -12,7 +12,6 @@ from fastmri.data.mri_data import fetch_dir
 from fastmri.data.subsample import create_mask_for_mask_type
 from fastmri.data.transforms_qalas import QALASDataTransform
 from fastmri.pl_modules import FastMriDataModuleQALAS, QALAS_MAPModule
-import os
 import shutil
 import h5py
 import numpy as np
@@ -48,19 +47,8 @@ def _prepare_ie_tmp(ie_h5_path: pathlib.Path):
     # Read H5 file to extract slice dimensions
     with h5py.File(str(ie_h5_path), "r") as f:
         Ny = Nx = Nz = None
-
-        # First priority: use /reconstruction_ie if it is a 3D dataset
-        if "/reconstruction_ie" in f and f["/reconstruction_ie"].ndim == 3:
-            Ny, Nx, Nz = f["/reconstruction_ie"].shape
-            print(f"[ie_tmp] Using shape from /reconstruction_ie: ({Ny}, {Nx}, {Nz})")
-        else:
-            # Otherwise, use one of the anatomical reconstruction maps
-            for key in ("/reconstruction_t1", "/reconstruction_t2", "/reconstruction_t2s",
-                        "/reconstruction_pd", "/reconstruction_b1"):
-                if key in f and f[key].ndim == 3:
-                    Ny, Nx, Nz = f[key].shape
-                    print(f"[ie_tmp] Using shape from {key}: ({Ny}, {Nx}, {Nz})")
-                    break
+        Ny, Nx, Nz = f["/reconstruction_ie"].shape
+        print(f"[ie_tmp] Using shape from /reconstruction_ie: ({Ny}, {Nx}, {Nz})")
 
         if Ny is None:
             raise RuntimeError("[ie_tmp] Could not find a valid (Ny, Nx, Nz) dataset in the H5 file.")
@@ -74,6 +62,12 @@ def _prepare_ie_tmp(ie_h5_path: pathlib.Path):
 
 def cli_main(args):
     pl.seed_everything(args.seed)
+
+    # Prepare IE .mat files before entering main training/testing loop
+    ie_h5_path = pathlib.Path(args.ie_h5_path)
+    if not ie_h5_path.exists():
+        raise FileNotFoundError(f"[ie_tmp] ie_h5_path does not exist: {ie_h5_path}")
+    _prepare_ie_tmp(ie_h5_path)
 
     # ------------
     # data
@@ -262,12 +256,6 @@ def build_args():
 
 
 def run_cli():
-    # Prepare IE .mat files before entering main training/testing loop
-    ie_h5_path = pathlib.Path(args.ie_h5_path)
-    if not ie_h5_path.exists():
-        raise FileNotFoundError(f"[ie_tmp] ie_h5_path does not exist: {ie_h5_path}")
-    _prepare_ie_tmp(ie_h5_path)
-
     args = build_args()
 
     # ---------------------
