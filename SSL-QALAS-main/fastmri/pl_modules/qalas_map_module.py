@@ -125,8 +125,8 @@ class QALAS_MAPModule(MriModuleQALAS_MAP):
                         b1, ie, max_value_t1, max_value_t2, max_value_pd, max_value_t2s, num_low_frequencies)
 
     def training_step(self, batch, batch_idx):
-        # ie_mat = sio.loadmat('ie_tmp/ie_s' + str(batch_idx+1) + '.mat') # for dict_v4 IE
-        # ie = torch.from_numpy(ie_mat['ie']) # for dict_v4 IE
+        ie_mat = sio.loadmat('ie_tmp/ie_s' + str(batch_idx+1) + '.mat') # for dict_v4 IE
+        ie = torch.from_numpy(ie_mat['ie']) # for dict_v4 IE
         
         output_t1, output_t2, output_pd, output_ie, output_b1, output_t2s, \
         output_img1, output_img2, output_img3, output_img4, output_img5, output_img6, output_img7, output_img8, output_img9 = \
@@ -134,7 +134,7 @@ class QALAS_MAPModule(MriModuleQALAS_MAP):
                  batch.masked_kspace_acq6, batch.masked_kspace_acq7, batch.masked_kspace_acq8, batch.masked_kspace_acq9, \
                 batch.mask_acq1, batch.mask_acq2, batch.mask_acq3, batch.mask_acq4, batch.mask_acq5, batch.mask_acq6, batch.mask_acq7, batch.mask_acq8, batch.mask_acq9, batch.mask_brain, \
                 # batch.b1, ie, batch.max_value_t1, batch.max_value_t2, batch.max_value_pd, batch.max_value_t2s, batch.num_low_frequencies) # for dict_v4 IE
-                batch.b1, batch.ie, batch.max_value_t1, batch.max_value_t2, batch.max_value_pd, batch.max_value_t2s, batch.num_low_frequencies)
+                batch.b1, ie, batch.max_value_t1, batch.max_value_t2, batch.max_value_pd, batch.max_value_t2s, batch.num_low_frequencies)
 
         # If raw k-space data were used, use following 5 lines
         # img_acq1 = fastmri.complex_abs(fastmri.complex_mul(fastmri.ifft2c(batch.masked_kspace_acq1), fastmri.complex_conj(batch.coil_sens)).sum(dim=1, keepdim=True)) / np.sqrt(batch.masked_kspace_acq1.shape[2] * batch.masked_kspace_acq1.shape[3])
@@ -364,8 +364,8 @@ class QALAS_MAPModule(MriModuleQALAS_MAP):
 
 
     def validation_step(self, batch, batch_idx):
-        # ie_mat = sio.loadmat('ie_tmp/ie_s' + str(batch_idx+1) + '.mat') # for dict_v4 IE
-        # ie = torch.from_numpy(ie_mat['ie']) # for dict_v4 IE
+        ie_mat = sio.loadmat('ie_tmp/ie_s' + str(batch_idx+1) + '.mat') # for dict_v4 IE
+        ie = torch.from_numpy(ie_mat['ie']) # for dict_v4 IE
 
         output_t1, output_t2, output_pd, output_ie, output_b1, output_t2s, \
         output_img1, output_img2, output_img3, output_img4, output_img5, output_img6, output_img7, output_img8, output_img9 = \
@@ -373,8 +373,7 @@ class QALAS_MAPModule(MriModuleQALAS_MAP):
                          batch.masked_kspace_acq6, batch.masked_kspace_acq7, batch.masked_kspace_acq8, batch.masked_kspace_acq9, \
                         batch.mask_acq1, batch.mask_acq2, batch.mask_acq3, batch.mask_acq4, batch.mask_acq5, \
                         batch.mask_acq6, batch.mask_acq7, batch.mask_acq8, batch.mask_acq9, batch.mask_brain, \
-                        # batch.b1, ie, batch.max_value_t1, batch.max_value_t2, batch.max_value_pd, batch.max_value_t2s, batch.num_low_frequencies) # for dict_v4 IE
-                        batch.b1, batch.ie, batch.max_value_t1, batch.max_value_t2, batch.max_value_pd, batch.max_value_t2s, batch.num_low_frequencies)
+                        batch.b1, ie, batch.max_value_t1, batch.max_value_t2, batch.max_value_pd, batch.max_value_t2s, batch.num_low_frequencies)
 
         # If raw k-space data were used, use following 5 lines
         # img_acq1 = fastmri.complex_abs(fastmri.complex_mul(fastmri.ifft2c(batch.masked_kspace_acq1), fastmri.complex_conj(batch.coil_sens)).sum(dim=1, keepdim=True)) / np.sqrt(batch.masked_kspace_acq1.shape[2] * batch.masked_kspace_acq1.shape[3])
@@ -437,18 +436,18 @@ class QALAS_MAPModule(MriModuleQALAS_MAP):
         output_b1 = output_b1 * batch.mask_brain
         output_t2s = output_t2s * batch.mask_brain
 
-        ### for dict_v4 IE
-        # b, nx, ny = output_ie.shape
-        # with torch.no_grad():
-        #     t1_dict = batch.ie[:,0:batch.ie.shape[2]-2,-2].squeeze(0).to(output_t1.device)
-        #     t2_dict = batch.ie[:,:,-1].squeeze(0).to(output_t2.device)
-        #     ie_ = batch.ie.squeeze(0)[:,0:-2].to(output_ie.device)
-        #     for x in range(nx):
-        #         t1_idx = torch.argmin(torch.absolute(t1_dict.unsqueeze(-1).repeat(1,ny)-output_t1[:,x,:].repeat(t1_dict.size(0),1)), dim=0)
-        #         t2_idx = torch.argmin(torch.absolute(t2_dict.unsqueeze(-1).repeat(1,ny)-output_t2[:,x,:].repeat(t2_dict.size(0),1)), dim=0)
-        #         output_ie[:,x,:] = ie_[t2_idx,t1_idx].unsqueeze(0)
-        # output_ie = output_ie * batch.mask_brain
-        ###
+        ## for dict_v4 IE
+        b, nx, ny = output_ie.shape
+        with torch.no_grad():
+            t1_dict = batch.ie[:,0:batch.ie.shape[2]-2,-2].squeeze(0).to(output_t1.device)
+            t2_dict = batch.ie[:,:,-1].squeeze(0).to(output_t2.device)
+            ie_ = batch.ie.squeeze(0)[:,0:-2].to(output_ie.device)
+            for x in range(nx):
+                t1_idx = torch.argmin(torch.absolute(t1_dict.unsqueeze(-1).repeat(1,ny)-output_t1[:,x,:].repeat(t1_dict.size(0),1)), dim=0)
+                t2_idx = torch.argmin(torch.absolute(t2_dict.unsqueeze(-1).repeat(1,ny)-output_t2[:,x,:].repeat(t2_dict.size(0),1)), dim=0)
+                output_ie[:,x,:] = ie_[t2_idx,t1_idx].unsqueeze(0)
+        output_ie = output_ie * batch.mask_brain
+        ##
 
         img_acq1 = img_acq1 * batch.mask_brain
         img_acq2 = img_acq2 * batch.mask_brain
@@ -500,8 +499,8 @@ class QALAS_MAPModule(MriModuleQALAS_MAP):
             output_img8 = output_img8 + 1e-5
             output_img9 = output_img9 + 1e-5
         
-        # ie = output_ie.squeeze(0).detach().cpu().numpy() # for dict_v4 IE
-        # sio.savemat('ie_tmp/ie_s' + str(batch_idx+1) + '.mat',{'ie':ie}) # for dict_v4 IE
+        ie = output_ie.squeeze(0).detach().cpu().numpy() # for dict_v4 IE
+        sio.savemat('ie_tmp/ie_s' + str(batch_idx+1) + '.mat',{'ie':ie}) # for dict_v4 IE
 
         def loss_tv(img):
             pixel_dif1 = img[..., 1:,:] - img[..., :-1,:]
@@ -609,8 +608,8 @@ class QALAS_MAPModule(MriModuleQALAS_MAP):
 
 
     def test_step(self, batch, batch_idx):
-        # ie_mat = sio.loadmat('ie_tmp/ie_s' + str(batch_idx+1) + '.mat') # for dict_v4 IE
-        # ie = torch.from_numpy(ie_mat['ie']) # for dict_v4 IE
+        ie_mat = sio.loadmat('ie_tmp/ie_s' + str(batch_idx+1) + '.mat') # for dict_v4 IE
+        ie = torch.from_numpy(ie_mat['ie']) # for dict_v4 IE
 
         output_t1, output_t2, output_pd, output_ie, output_t2s,\
         output_img1, output_img2, output_img3, output_img4, output_img5, output_img6, output_img7, output_img8, output_img9 = \
@@ -618,8 +617,7 @@ class QALAS_MAPModule(MriModuleQALAS_MAP):
                  batch.masked_kspace_acq6, batch.masked_kspace_acq7, batch.masked_kspace_acq8, batch.masked_kspace_acq9, \
                 batch.mask_acq1, batch.mask_acq2, batch.mask_acq3, batch.mask_acq4, batch.mask_acq5, \
                 batch.mask_acq6, batch.mask_acq7, batch.mask_acq8, batch.mask_acq9, batch.mask_brain, \
-                # batch.b1, ie, batch.max_value_t1, batch.max_value_t2, batch.max_value_pd, batch.max_value_t2s, batch.num_low_frequencies) # for dict_v4 IE
-                batch.b1, batch.ie, batch.max_value_t1, batch.max_value_t2, batch.max_value_pd, batch.max_value_t2s, batch.num_low_frequencies)
+                batch.b1, ie, batch.max_value_t1, batch.max_value_t2, batch.max_value_pd, batch.max_value_t2s, batch.num_low_frequencies)
 
         # check for FLAIR 203
         if output_t1.shape[-1] < batch.crop_size[1]:

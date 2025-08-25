@@ -22,7 +22,7 @@ pip install -e .
 To train the model, run `train_qalas.py` as below:
 
 ```bash
-python SSL-QALAS-main/qalas/train_qalas.py
+python SSL-QALAS-main/qalas/train_qalas.py --check_val_every_n_epoch 1 --num_sanity_val_steps 0 --sample_rate 0.5
 ```
 
 Note: some of the variables (e.g., turbo factor or echo spacing) might need to be updated in the  `fastmri/models/qalas_map.py` (L287-L288) based on your sequence.
@@ -38,7 +38,7 @@ tensorboard --logdir=qalas_log/lightning_logs
 To infer the model, run `inference_qalas_map.py` as below:
 
 ```bash
-python SSL-QALAS-main/qalas/inference_qalas_map.py --data_path /autofs/space/marduk_001/users/tommy/mimosa_data/multicoil_val --state_dict_file /autofs/space/marduk_001/users/tommy/mimosa_log/checkpoints/epoch=491-step=94464.ckpt --output_path /autofs/space/marduk_001/users/tommy/mimosa_data
+python SSL-QALAS-main/qalas/inference_qalas_map.py --data_path /autofs/space/marduk_001/users/tommy/mimosa_plus_data/multicoil_val --state_dict_file /autofs/space/marduk_001/users/tommy/mimosa_log/checkpoints/epoch=491-step=94464.ckpt --output_path /autofs/space/marduk_001/users/tommy/mimosa_plus_data
 ```
 
 The reconstructed maps under `matlab/h5_data/reconstructions` can be read on Matlab using `h5read` matlab function:

@@ -12,9 +12,65 @@ from fastmri.data.mri_data import fetch_dir
 from fastmri.data.subsample import create_mask_for_mask_type
 from fastmri.data.transforms_qalas import QALASDataTransform
 from fastmri.pl_modules import FastMriDataModuleQALAS, QALAS_MAPModule
+import os
+import shutil
+import h5py
+import numpy as np
+from scipy.io import savemat
 
 import torch.multiprocessing
 torch.multiprocessing.set_sharing_strategy('file_system')
+
+def _prepare_ie_tmp(ie_h5_path: pathlib.Path):
+    """
+    Prepare the ie_tmp folder and generate slice-wise .mat files filled with ones.
+    
+    Steps:
+    - Create qalas/ie_tmp folder (if it does not exist).
+    - Delete all existing files inside qalas/ie_tmp.
+    - Open the reference H5 file to determine slice dimensions (Ny, Nx, Nz).
+    - For each slice index (1..Nz), save a file named ie_s{nn}.mat 
+      containing a variable 'ie' = ones(Ny, Nx, dtype=single).
+    """
+
+    # Create ie_tmp directory inside qalas
+    qalas_dir = pathlib.Path(__file__).resolve().parent
+    ie_tmp_dir = qalas_dir / "ie_tmp"
+    ie_tmp_dir.mkdir(parents=True, exist_ok=True)
+
+    # Remove all existing files/subfolders inside ie_tmp
+    for p in ie_tmp_dir.iterdir():
+        if p.is_file() or p.is_symlink():
+            p.unlink(missing_ok=True)
+        elif p.is_dir():
+            shutil.rmtree(p, ignore_errors=True)
+
+    # Read H5 file to extract slice dimensions
+    with h5py.File(str(ie_h5_path), "r") as f:
+        Ny = Nx = Nz = None
+
+        # First priority: use /reconstruction_ie if it is a 3D dataset
+        if "/reconstruction_ie" in f and f["/reconstruction_ie"].ndim == 3:
+            Ny, Nx, Nz = f["/reconstruction_ie"].shape
+            print(f"[ie_tmp] Using shape from /reconstruction_ie: ({Ny}, {Nx}, {Nz})")
+        else:
+            # Otherwise, use one of the anatomical reconstruction maps
+            for key in ("/reconstruction_t1", "/reconstruction_t2", "/reconstruction_t2s",
+                        "/reconstruction_pd", "/reconstruction_b1"):
+                if key in f and f[key].ndim == 3:
+                    Ny, Nx, Nz = f[key].shape
+                    print(f"[ie_tmp] Using shape from {key}: ({Ny}, {Nx}, {Nz})")
+                    break
+
+        if Ny is None:
+            raise RuntimeError("[ie_tmp] Could not find a valid (Ny, Nx, Nz) dataset in the H5 file.")
+
+    # Generate ones-based .mat file for each slice
+    for nn in range(1, Nz + 1):
+        print(f"saving... {nn}/{Nz} ", end="", flush=True)
+        ie = np.ones((Ny, Nx), dtype=np.float32)  # single precision (MATLAB 'single')
+        savemat(str(ie_tmp_dir / f"ie_s{nn}.mat"), {"ie": ie})
+        print("done")
 
 def cli_main(args):
     pl.seed_everything(args.seed)
@@ -99,7 +155,7 @@ def build_args():
 
     # set defaults based on optional directory config
     data_path = fetch_dir("brain_path", path_config)
-    default_root_dir = fetch_dir("log_path", path_config) / "mimosa_log" # qalas_log
+    default_root_dir = fetch_dir("log_path", path_config) / "mimosa_plus_log" # qalas_log
 
     # client arguments
     parser.add_argument(
@@ -131,6 +187,13 @@ def build_args():
         default=[4],
         type=int,
         help="Acceleration rates to use for masks",
+    )
+
+    parser.add_argument(
+        "--ie_h5_path",
+        type=str,
+        default="/autofs/space/marduk_001/users/tommy/mimosa_plus_data/multicoil_train/mimosa_plus_train.h5",
+        help="Path to H5 file used to determine slice dimensions for IE .mat generation",
     )
 
     # data config
@@ -199,6 +262,12 @@ def build_args():
 
 
 def run_cli():
+    # Prepare IE .mat files before entering main training/testing loop
+    ie_h5_path = pathlib.Path(args.ie_h5_path)
+    if not ie_h5_path.exists():
+        raise FileNotFoundError(f"[ie_tmp] ie_h5_path does not exist: {ie_h5_path}")
+    _prepare_ie_tmp(ie_h5_path)
+
     args = build_args()
 
     # ---------------------

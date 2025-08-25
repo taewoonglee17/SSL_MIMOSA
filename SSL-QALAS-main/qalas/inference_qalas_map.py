@@ -30,8 +30,8 @@ MODEL_FNAMES = {
 
 
 def run_model(batch, model, device):
-    # ie_mat = sio.loadmat('ie_tmp/ie_s' + str(batch.slice_num.detach().cpu().numpy()[0]+1) + '.mat') # for dict_v4 IE
-    # ie = torch.from_numpy(ie_mat['ie']) # for dict_v4 IE
+    ie_mat = sio.loadmat('ie_tmp/ie_s' + str(batch.slice_num.detach().cpu().numpy()[0]+1) + '.mat') # for dict_v4 IE
+    ie = torch.from_numpy(ie_mat['ie']) # for dict_v4 IE
     crop_size = batch.crop_size
 
     output_t1, output_t2, output_pd, output_ie, output_b1, output_t2s,\
@@ -39,7 +39,7 @@ def run_model(batch, model, device):
             model(batch.masked_kspace_acq1.to(device), batch.masked_kspace_acq2.to(device), batch.masked_kspace_acq3.to(device), batch.masked_kspace_acq4.to(device), batch.masked_kspace_acq5.to(device), \
                   batch.masked_kspace_acq6.to(device), batch.masked_kspace_acq7.to(device), batch.masked_kspace_acq8.to(device), batch.masked_kspace_acq9.to(device), \
                 batch.mask_acq1, batch.mask_acq2, batch.mask_acq3, batch.mask_acq4, batch.mask_acq5, batch.mask_acq6, batch.mask_acq7, batch.mask_acq8, batch.mask_acq9, batch.mask_brain, \
-                batch.b1, batch.ie, \
+                batch.b1, ie, \
                 batch.max_value_t1.to(device), batch.max_value_t2.to(device), batch.max_value_pd.to(device), batch.max_value_t2s.to(device), batch.num_low_frequencies.to(device))
 
     # detect FLAIR 203
@@ -62,15 +62,15 @@ def run_model(batch, model, device):
     output_t2s = output_t2s * batch.mask_brain.to(device)
 
     ### for dict_v4 IE
-    # b, nx, ny = output_ie.shape
-    # with torch.no_grad():
-    #     t1_dict = batch.ie[:,0:batch.ie.shape[2]-2,-2].squeeze(0).to(output_t1.device)
-    #     t2_dict = batch.ie[:,:,-1].squeeze(0).to(output_t2.device)
-    #     ie_ = batch.ie.squeeze(0)[:,0:-2].to(output_ie.device)
-    #     for x in range(nx):
-    #         t1_idx = torch.argmin(torch.absolute(t1_dict.unsqueeze(-1).repeat(1,ny)-output_t1[:,x,:].repeat(t1_dict.size(0),1)), dim=0)
-    #         t2_idx = torch.argmin(torch.absolute(t2_dict.unsqueeze(-1).repeat(1,ny)-output_t2[:,x,:].repeat(t2_dict.size(0),1)), dim=0)
-    #         output_ie[:,x,:] = ie_[t2_idx,t1_idx].unsqueeze(0)
+    b, nx, ny = output_ie.shape
+    with torch.no_grad():
+        t1_dict = batch.ie[:,0:batch.ie.shape[2]-2,-2].squeeze(0).to(output_t1.device)
+        t2_dict = batch.ie[:,:,-1].squeeze(0).to(output_t2.device)
+        ie_ = batch.ie.squeeze(0)[:,0:-2].to(output_ie.device)
+        for x in range(nx):
+            t1_idx = torch.argmin(torch.absolute(t1_dict.unsqueeze(-1).repeat(1,ny)-output_t1[:,x,:].repeat(t1_dict.size(0),1)), dim=0)
+            t2_idx = torch.argmin(torch.absolute(t2_dict.unsqueeze(-1).repeat(1,ny)-output_t2[:,x,:].repeat(t2_dict.size(0),1)), dim=0)
+            output_ie[:,x,:] = ie_[t2_idx,t1_idx].unsqueeze(0)
     ###
 
     return output_t1, output_t2, output_pd, output_ie, output_b1, output_t2s, int(batch.slice_num[0]), batch.fname[0]

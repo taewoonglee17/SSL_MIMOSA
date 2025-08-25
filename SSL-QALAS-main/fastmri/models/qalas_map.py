@@ -130,7 +130,7 @@ class MappingModel(nn.Module):
         num_layers: int,
         num_pools: int = 3,
         in_chans: int = 9,
-        out_chans: int = 5, # number of quantitative maps
+        out_chans: int = 4, # number of quantitative maps
         drop_prob: float = 0.0,
     ):
         """
@@ -277,9 +277,9 @@ class QALAS_MAP(nn.Module):
         map_pred_pd = map_pred[:,2:3,:,:] / torch.sin(np.pi / 180 * torch.Tensor([4]).to(map_pred.device)) # org
         # map_pred_pd = map_pred[:,2:3,:,:] / torch.sin(np.pi / 180 * torch.Tensor([4*0.1]).to(map_pred.device))
         # map_pred_ie = map_pred[:,3:4,:,:] * (1 - 0.5) + 0.5 # 0.5-1.0
-        map_pred_ie = map_pred[:,3:4,:,:] * (1 - 0.8) + 0.8 # 0.8-1.0
+        map_pred_ie = ie.unsqueeze(0).unsqueeze(1).to(map_pred.device) # for dict_v4 IE
         # map_pred_ie = ie.unsqueeze(0).unsqueeze(1).to(map_pred.device) # for dict_v4 IE
-        map_pred_t2s = map_pred[:,4:5,:,:] * max_value_t2s[0,:]
+        map_pred_t2s = map_pred[:,3:4,:,:] * max_value_t2s[0,:]
 
         map_pred_b1 = b1.unsqueeze(1).to(map_pred.device)
         
