@@ -24,7 +24,7 @@ load('/autofs/space/marduk_001/users/tommy/20240820_nist/slice29_T2pla_IElkp_dic
 
 % Load IE Dictionary
 load([iepath,'ielookup_toolbox_v3.mat']);
-IE_map = single(cat(2,ielookup.ies_mtx,cat(1,ielookup.T1',zeros(length(ielookup.T2)-length(ielookup.T1),1)),ielookup.T2));
+IE_dict = single(cat(2,ielookup.ies_mtx,cat(1,ielookup.T1',zeros(length(ielookup.T2)-length(ielookup.T1),1)),ielookup.T2));
 
     % Name them consistently with previous script
 input_img = img;
@@ -34,6 +34,7 @@ input_img = single(input_img);
 input_img = reshape(input_img, [size(input_img,1), size(input_img,2), size(input_img,3), 1, size(input_img,4)]);
 [Nx,Ny,Nz,~,Nacq]  = size(input_img);
 
+IE_map = reshape(IE_map, [size(IE_map,1), size(IE_map,2), 1]);
 PD_map = reshape(PD_map, [size(PD_map,1), size(PD_map,2), 1]);
 T1_map = reshape(T1_map, [size(T1_map,1), size(T1_map,2), 1]);
 T2_map = reshape(T2_map, [size(T2_map,1), size(T2_map,2), 1]);
@@ -52,6 +53,7 @@ T1_map  = abs(single(T1_map))/1000;
 T2_map  = abs(single(T2_map))/1000;
 T2s_map = abs(single(T2s_map))/1000;
 PD_map  = abs(single(PD_map));
+IE_map  = abs(single(IE_map));
 img_b1 = abs(single(img_b1));
 
 toc
@@ -78,6 +80,7 @@ if compare_ref_map == 0
     T2_map  = ones(Nx,Ny,Nz,'single').*2.5;
     T2s_map = ones(Nx,Ny,Nz,'single').*0.05;
     PD_map  = ones(Nx,Ny,Nz,'single');
+    IE_map  = ones(Nx,Ny,Nz,'single');
 end
 
 if load_b1_map == 0
@@ -91,6 +94,8 @@ T1_map      = permute(T1_map,[2,1,3]);
 T2_map      = permute(T2_map,[2,1,3]);
 T2s_map     = permute(T2s_map,[2,1,3]);
 PD_map      = permute(PD_map,[2,1,3]);
+IE_map      = permute(IE_map,[2,1,3]);
+IE_dict      = permute(IE_dict,[2,1,3]);
 B1_map      = permute(B1_map,[2,1,3]);
 
 bmask       = permute(bmask,[2,1,3]);
@@ -139,8 +144,10 @@ h5create(file_name,'/reconstruction_t2s',[Ny,Nx,Nz],'Datatype','single');
 h5write(file_name, '/reconstruction_t2s', T2s_map);
 h5create(file_name,'/reconstruction_pd',[Ny,Nx,Nz],'Datatype','single');
 h5write(file_name, '/reconstruction_pd', PD_map);
-h5create(file_name,'/reconstruction_ie',[size(IE_map,1),size(IE_map,2),size(IE_map,3)],'Datatype','single');
-h5write(file_name, '/reconstruction_ie', IE_map);
+h5create(file_name,'/reconstruction_ie',[size(IE_dict,1),size(IE_dict,2),size(IE_dict,3)],'Datatype','single');
+h5write(file_name, '/reconstruction_ie', IE_dict);
+h5create(file_name,'/reconstruction_ie_regression',[Ny,Nx,Nz],'Datatype','single');
+h5write(file_name, '/reconstruction_ie_regression', IE_map);
 h5create(file_name,'/reconstruction_b1',[Ny,Nx,Nz],'Datatype','single');
 h5write(file_name, '/reconstruction_b1', B1_map);
 
@@ -168,8 +175,10 @@ h5writeatt(file_name,'/','norm_t2s',norm(T2s_map(:)));
 h5writeatt(file_name,'/','max_t2s',max(T2s_map(:)));
 h5writeatt(file_name,'/','norm_pd',norm(PD_map(:)));
 h5writeatt(file_name,'/','max_pd',max(PD_map(:)));
-h5writeatt(file_name,'/','norm_ie',norm(IE_map(:)));
-h5writeatt(file_name,'/','max_ie',max(IE_map(:)));
+h5writeatt(file_name,'/','norm_ie',norm(IE_dict(:)));
+h5writeatt(file_name,'/','max_ie',max(IE_dict(:)));
+h5writeatt(file_name,'/','norm_ie_regression',norm(IE_map(:)));
+h5writeatt(file_name,'/','max_ie_regression',max(IE_map(:)));
 h5writeatt(file_name,'/','norm_b1',norm(B1_map(:)));
 h5writeatt(file_name,'/','max_b1',max(B1_map(:)));
 h5writeatt(file_name,'/','patient_id',att_patient);
