@@ -38,7 +38,7 @@ tensorboard --logdir=qalas_log/lightning_logs
 To infer the model, run `inference_qalas_map.py` as below:
 
 ```bash
-python python SSL-QALAS-main/qalas/inference_qalas_map.py --data_path /autofs/space/marduk_001/users/tommy/mimosa_plus_data/multicoil_val --state_dict_file /autofs/space/marduk_001/users/tommy/mimosa_plus_log/checkpoints/epoch=990-step=991.ckpt --output_path /autofs/space/marduk_001/users/tommy/mimosa_plus_data
+python SSL-QALAS-main/qalas/inference_qalas_map.py --data_path /autofs/space/marduk_001/users/tommy/mimosa_plus_data/multicoil_val --state_dict_file /autofs/space/marduk_001/users/tommy/mimosa_plus_log/checkpoints/epoch=990-step=991.ckpt --output_path /autofs/space/marduk_001/users/tommy/mimosa_plus_data
 ```
 
 The reconstructed maps under `matlab/h5_data/reconstructions` can be read on Matlab using `h5read` matlab function:

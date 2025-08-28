@@ -16,6 +16,7 @@ import shutil
 import h5py
 import numpy as np
 from scipy.io import savemat
+from pathlib import Path
 
 import torch.multiprocessing
 torch.multiprocessing.set_sharing_strategy('file_system')
@@ -33,8 +34,7 @@ def _prepare_ie_tmp(ie_h5_path: pathlib.Path):
     """
 
     # Create ie_tmp directory inside qalas
-    qalas_dir = pathlib.Path(__file__).resolve().parent
-    ie_tmp_dir = qalas_dir / "ie_tmp"
+    ie_tmp_dir = Path.cwd()/"ie_tmp"
     ie_tmp_dir.mkdir(parents=True, exist_ok=True)
 
     # Remove all existing files/subfolders inside ie_tmp
