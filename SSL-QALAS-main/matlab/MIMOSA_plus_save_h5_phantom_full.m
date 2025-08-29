@@ -38,21 +38,8 @@ IE_dict = single(cat(2, ielookup.ies_mtx, ...
                      cat(1, ielookup.T1', zeros(length(ielookup.T2)-length(ielookup.T1),1)), ...
                      ielookup.T2));
 
-% Ensure input_img is [Nx, Ny, Nz, 1, Nacq]
-sz = size(input_img);
-if numel(sz) ~= 4
-    error('Expected img to be 4-D (Nx x Ny x Nz x Nacq) or (Nx x Ny x Nacq x Nz).');
-end
-Nz_ref = size(T1_map,3);
-if sz(3) == Nz_ref
-    % img is [Nx, Ny, Nz, Nacq]
-    input_img = reshape(single(input_img), [sz(1), sz(2), sz(3), 1, sz(4)]);
-else
-    % img is [Nx, Ny, Nacq, Nz] -> permute to [Nx, Ny, Nz, Nacq]
-    input_img = permute(input_img, [1,2,4,3]);
-    sz2 = size(input_img);
-    input_img = reshape(single(input_img), [sz2(1), sz2(2), sz2(3), 1, sz2(4)]);
-end
+input_img = single(input_img);            
+input_img = reshape(input_img, [size(input_img,1), size(input_img,2), size(input_img,3), 1, size(input_img,4)]);
 [Nx,Ny,Nz,~,Nacq]  = size(input_img);
 
 % Parameter maps (keep all slices; no collapsing)
@@ -68,8 +55,6 @@ if load_b1_map == 1
     B1_map = single(img_b1);
     B1_map(B1_map>1.35) = 1.35;
     B1_map(B1_map<0.65) = 0.65;
-else
-    B1_map = ones(Nx,Ny,Nz,'single');
 end
 
 % Real-valued & units (ms -> s for T1/T2/T2s)
