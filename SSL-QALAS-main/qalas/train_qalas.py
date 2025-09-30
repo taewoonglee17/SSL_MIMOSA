@@ -4,6 +4,10 @@ Copyright (c) Facebook, Inc. and its affiliates.
 This source code is licensed under the MIT license found in the
 LICENSE file in the root directory of this source tree.
 """
+import sys
+repo_root = "/autofs/cluster/berkin/tommy/SSL_MIMOSA_PLUS/SSL-QALAS-main"
+if repo_root not in sys.path:
+    sys.path.insert(0, repo_root)
 import pathlib
 from argparse import ArgumentParser
 
