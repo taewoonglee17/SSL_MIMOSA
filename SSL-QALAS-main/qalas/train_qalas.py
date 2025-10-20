@@ -4,10 +4,6 @@ Copyright (c) Facebook, Inc. and its affiliates.
 This source code is licensed under the MIT license found in the
 LICENSE file in the root directory of this source tree.
 """
-import sys
-repo_root = "/autofs/cluster/berkin/tommy/SSL_MIMOSA_PLUS/SSL-QALAS-main"
-if repo_root not in sys.path:
-    sys.path.insert(0, repo_root)
 import pathlib
 from argparse import ArgumentParser
 
@@ -26,17 +22,6 @@ import torch.multiprocessing
 torch.multiprocessing.set_sharing_strategy('file_system')
 
 def _prepare_ie_tmp(ie_h5_path: pathlib.Path):
-    """
-    Prepare the ie_tmp folder and generate slice-wise .mat files filled with ones.
-    
-    Steps:
-    - Create qalas/ie_tmp folder (if it does not exist).
-    - Delete all existing files inside qalas/ie_tmp.
-    - Open the reference H5 file to determine slice dimensions (Ny, Nx, Nz).
-    - For each slice index (1..Nz), save a file named ie_s{nn}.mat 
-      containing a variable 'ie' = ones(Ny, Nx, dtype=single).
-    """
-
     # Create ie_tmp directory inside qalas
     ie_tmp_dir = Path.cwd()/"ie_tmp"
     ie_tmp_dir.mkdir(parents=True, exist_ok=True)
@@ -50,12 +35,12 @@ def _prepare_ie_tmp(ie_h5_path: pathlib.Path):
 
     # Read H5 file to extract slice dimensions
     with h5py.File(str(ie_h5_path), "r") as f:
-        Ny = Nx = Nz = None
-        Ny, Nx, Nz = f["/reconstruction_ie"].shape
-        print(f"[ie_tmp] Using shape from /reconstruction_ie: ({Ny}, {Nx}, {Nz})")
+        Nx = Ny = Nz = None
+        Nz, Ny, Nx = f["/reconstruction_ie_regression"].shape
+        print(f"[ie_tmp] Using shape from /reconstruction_ie_regression: ({Nx}, {Ny}, {Nz})")
 
-        if Ny is None:
-            raise RuntimeError("[ie_tmp] Could not find a valid (Ny, Nx, Nz) dataset in the H5 file.")
+        if Nx is None:
+            raise RuntimeError("[ie_tmp] Could not find a valid (Nx, Ny, Nz) dataset in the H5 file.")
 
     # Generate ones-based .mat file for each slice
     for nn in range(1, Nz + 1):
@@ -227,7 +212,7 @@ def build_args():
         seed=42,  # random seed
         deterministic=True,  # makes things slower, but deterministic
         default_root_dir=default_root_dir,  # directory for logs and checkpoints
-        max_epochs=700,  # max number of epochs
+        max_epochs=2000,  # max number of epochs
         check_val_every_n_epoch=4 # how often to run validation loop (default: every 1 epoch)
 
     )
