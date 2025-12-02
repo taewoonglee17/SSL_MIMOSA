@@ -1,78 +1,58 @@
 # SSL-QALAS: Self-Supervised Learning for Rapid Multiparameter Estimation in Quantitative MRI Using 3D-QALAS
 
-![Alt text](figure/SSL-MIMOSA.png?raw=true "SSL-QALAS")
+![Alt text](figure/SSL-MIMOSA.png?raw=true "SSL-MIMOSA")
 
+This is the official code for **"SSL-MIMOSA: Self-Supervised Learning for Fast Multiparameter Estimation Including T₂* Mapping in Quantitative MRI with MIMOSA"**.
 
-This is the official code for **"SSL-QALAS: Self-Supervised Learning for Rapid Multiparameter Estimation in Quantitative MRI Using 3D-QALAS"**.
+The code structure is based on [SSL-QALAS](https://github.com/yohan-jun/SSL-QALAS).
 
-The related paper is published at [Magnetic Resonance in Medicine](https://doi.org/10.1002/mrm.29786).
-
-The baseline code is based on fastMRI code, which is forked from [here](https://github.com/facebookresearch/fastMRI).
+The baseline code is based on [fastMRI](https://github.com/facebookresearch/fastMRI).
 
 ## Installation
 For dependencies and installation, please follow below:
 
 ```bash
 conda env create -f environment.yml
-conda activate ssl_qalas
+conda activate ssl_mimosa
 pip install -e .
 ```
+## Generating Training and Validation Data
+To make the .h5 file, run the `MIMOSA_plus_save_h5.m` matlab file.
+
+This assumes the same subject data is used for validation (i.e., subject specific training and validation), so `train_data.h5` is used as for `val_data.h5`.
+
+Sample data can be found [here](https://drive.google.com/drive/folders/1ISMRvQYMNe-zX9sbl8K4Gisd32RDa9Ov?usp=sharing). This includes the IE dictionary.
 
 ## Model Training
-To train the model, run `train_qalas.py` as below:
+To train the model, run `train_mimosa.py` as below:
 
 ```bash
-python SSL-QALAS-main/qalas/train_qalas.py --check_val_every_n_epoch 1 --num_sanity_val_steps 0 --sample_rate 0.5
+python SSL-MIMOSA-main/mimosa/train_mimosa.py --check_val_every_n_epoch 1 --num_sanity_val_steps 0 --sample_rate 1.0
 ```
 
-Note: some of the variables (e.g., turbo factor or echo spacing) might need to be updated in the  `fastmri/models/qalas_map.py` (L287-L288) based on your sequence.
+Note: some of the variables (e.g., turbo factor or echo spacing) might need to be updated in the  `fastmri/models/qalas_map.py` based on your sequence.
 
 ## Training and Validation Logs
 To track the training and validation logs, run the tensorboard as below:
 
 ```bash
-tensorboard --logdir=qalas_log/lightning_logs
+tensorboard --logdir=mimosa_plus_log/lightning_logs
 ```
 
 ## Inference
-To infer the model, run `inference_qalas_map.py` as below:
+To infer the model, run `inference_mimosa_map.py` as below:
+Note: the directories should be updated to reflect your directories, and the checkpoint file should be updated corresponding to your training.
 
 ```bash
-python SSL-QALAS-main/qalas/inference_qalas_map.py --data_path /autofs/space/marduk_001/users/tommy/mimosa_plus_data/multicoil_val --state_dict_file /autofs/space/marduk_001/users/tommy/mimosa_plus_log/checkpoints/epoch=990-step=991.ckpt --output_path /autofs/space/marduk_001/users/tommy/mimosa_plus_data
+python SSL-MIMOSA-main/mimosa/inference_mimosa_map.py --data_path /autofs/space/marduk_001/users/tommy/mimosa_plus_data/multicoil_val --state_dict_file /autofs/space/marduk_001/users/tommy/mimosa_plus_log/checkpoints/epoch=990-step=991.ckpt --output_path /autofs/space/marduk_001/users/tommy/mimosa_plus_data
 ```
 
-The reconstructed maps under `matlab/h5_data/reconstructions` can be read on Matlab using `h5read` matlab function:
+The reconstructed maps can be read on Matlab using the `h5read` matlab function:
 
 ```bash
 T1 = h5read('train_data.h5','/reconstruction_t1');
 T2 = h5read('train_data.h5','/reconstruction_t2');
+T2s = h5read('train_data.h5','/reconstruction_t2s');
 PD = h5read('train_data.h5','/reconstruction_pd');
 IE = h5read('train_data.h5','/reconstruction_ie');
-```
-
-## Generating Training and Validation Data
-To make .h5 file, run `ssl_qalas_save_h5_from_dicom.m` matlab file
-
-If the same subject data is used for validation (i.e., subject specific training and validation), copy `train_data.h5` and paste under `matlab/h5_data/multicoil_val`.
-
-(Optional) To compare the SSL-QALAS with the reference maps (e.g., dictionary matching results), please put them under `matlab/map_data` (format: .mat file which may contain T1_map, T2_map, PD_map, IE_map, and B1_map)
-
-Sample data can be found [here](https://www.dropbox.com/scl/fo/0lqsttrqavmfxgq32ptkd/h?rlkey=z6f2cnt3243b7us0izac79zj6&dl=0)
-
-## Cite
-If you have any questions/comments/suggestions, please contact at yjun@mgh.harvard.edu
-
-If you use the SSL-QALAS code in your project, please cite the following paper:
-
-```BibTeX
-@article{jun2023SSL-QALAS,
-  title={{SSL-QALAS}: Self-Supervised Learning for rapid multiparameter estimation in quantitative {MRI} using {3D-QALAS}},
-  author={Jun, Yohan and Cho, Jaejin and Wang, Xiaoqing and Gee, Michael and Grant, P. Ellen and Bilgic, Berkin and Gagoski, Borjan},
-  journal={Magnetic resonance in medicine},
-  volume={90},
-  number={5},
-  pages={2019--2032},
-  year={2023},
-  publisher={Wiley Online Library}
-}
 ```
