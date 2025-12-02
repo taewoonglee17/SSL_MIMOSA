@@ -7,7 +7,7 @@ This is the official code for **"SSL-MIMOSA: Self-Supervised Learning for Fast M
 The code structure is based on [SSL-QALAS](https://github.com/yohan-jun/SSL-QALAS) and [fastMRI](https://github.com/facebookresearch/fastMRI).
 
 ## Installation
-For dependencies and installation, please follow below:
+For dependencies and installation, run the following:
 
 ```bash
 conda env create -f environment.yml
@@ -17,7 +17,7 @@ pip install -e .
 ## Generating Training and Validation Data
 To make the .h5 file, run the `MIMOSA_plus_save_h5.m` matlab file.
 
-This assumes the same subject data is used for validation (i.e., subject specific training and validation), so `train_data.h5` is used as for `val_data.h5`.
+This assumes the same subject data is used for validation (i.e., subject specific training and validation), so `train_data.h5` is used for `val_data.h5`.
 
 Sample data can be found [here](https://drive.google.com/drive/folders/1ISMRvQYMNe-zX9sbl8K4Gisd32RDa9Ov?usp=sharing). This includes the IE dictionary.
 
@@ -39,7 +39,7 @@ tensorboard --logdir=mimosa_plus_log/lightning_logs
 
 ## Inference
 To infer the model, run `inference_mimosa_map.py` as below:
-Note: the directories should be updated to reflect your directories, and the checkpoint file should be updated corresponding to your training.
+Note: the directories should be updated to reflect your directories, and the checkpoint file should be updated corresponding to your training outcome.
 
 ```bash
 python SSL-MIMOSA-main/mimosa/inference_mimosa_map.py --data_path /autofs/space/marduk_001/users/tommy/mimosa_plus_data/multicoil_val --state_dict_file /autofs/space/marduk_001/users/tommy/mimosa_plus_log/checkpoints/epoch=990-step=991.ckpt --output_path /autofs/space/marduk_001/users/tommy/mimosa_plus_data
