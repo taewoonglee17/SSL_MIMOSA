@@ -1,6 +1,6 @@
 # SSL-QALAS: Self-Supervised Learning for Rapid Multiparameter Estimation in Quantitative MRI Using 3D-QALAS
 
-![Alt text](figure/SSL-QALAS.jpg?raw=true "SSL-QALAS")
+![Alt text](figure/SSL-MIMOSA.png?raw=true "SSL-QALAS")
 
 
 This is the official code for **"SSL-QALAS: Self-Supervised Learning for Rapid Multiparameter Estimation in Quantitative MRI Using 3D-QALAS"**.
