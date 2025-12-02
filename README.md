@@ -4,9 +4,7 @@
 
 This is the official code for **"SSL-MIMOSA: Self-Supervised Learning for Fast Multiparameter Estimation Including T₂* Mapping in Quantitative MRI with MIMOSA"**.
 
-The code structure is based on [SSL-QALAS](https://github.com/yohan-jun/SSL-QALAS).
-
-The baseline code is based on [fastMRI](https://github.com/facebookresearch/fastMRI).
+The code structure is based on [SSL-QALAS](https://github.com/yohan-jun/SSL-QALAS) and [fastMRI](https://github.com/facebookresearch/fastMRI).
 
 ## Installation
 For dependencies and installation, please follow below:
