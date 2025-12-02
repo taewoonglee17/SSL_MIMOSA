@@ -1,4 +1,4 @@
-# SSL-QALAS: Self-Supervised Learning for Rapid Multiparameter Estimation in Quantitative MRI Using 3D-QALAS
+# SSL-MIMOSA: Self-Supervised Learning for Fast Multiparameter Estimation Including T₂* Mapping in Quantitative MRI with MIMOSA
 
 ![Alt text](figure/SSL-MIMOSA.png?raw=true "SSL-MIMOSA")
 
