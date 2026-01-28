@@ -54,3 +54,6 @@ T2s = h5read('train_data.h5','/reconstruction_t2s');
 PD = h5read('train_data.h5','/reconstruction_pd');
 IE = h5read('train_data.h5','/reconstruction_ie');
 ```
+
+## Contact
+If you have any questions/comments/suggestions, please contact me at taewoonglee@college.harvard.edu
