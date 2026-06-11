@@ -2,7 +2,8 @@
 
 ![Alt text](figure/SSL-MIMOSA.png?raw=true "SSL-MIMOSA")
 
-This is the official code for **"SSL-MIMOSA: Self-Supervised Learning for Fast Multiparameter Estimation Including T₂* Mapping in Quantitative MRI with MIMOSA"** presented at [ISMRM 2026](https://echo.ismrm.org/program/ISMRM2026/at-a-glance/session/794).
+This is the official code for **"SSL-MIMOSA: Self-Supervised Learning for Fast Multiparameter Estimation Including T₂* Mapping in Quantitative MRI with MIMOSA"**
+The abstract was presented at [ISMRM 2026](https://echo.ismrm.org/program/ISMRM2026/at-a-glance/session/794).
 
 The code structure is based on [SSL-QALAS](https://github.com/yohan-jun/SSL-QALAS) and [fastMRI](https://github.com/facebookresearch/fastMRI).
 
