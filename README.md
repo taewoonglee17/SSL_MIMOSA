@@ -1,6 +1,6 @@
 # SSL-MIMOSA: Self-Supervised Learning for Fast Multiparameter Estimation Including T₂* Mapping in Quantitative MRI with MIMOSA
 
-![Alt text](figure/SSL-MIMOSA.png?raw=true "SSL-MIMOSA")
+![Alt text](figure/SSL-MIMOSA Figure.png?raw=true "SSL-MIMOSA")
 
 This is the official code for **"SSL-MIMOSA: Self-Supervised Learning for Fast Multiparameter Estimation Including T₂\* Mapping in Quantitative MRI with MIMOSA"**.
 
